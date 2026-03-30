@@ -206,8 +206,9 @@ document.getElementById('btn-load').addEventListener('click', () => {
 
 // ── Debug load ───────────────────────────────────────────
 document.getElementById('btn-sample').addEventListener('click', async () => {
-  const res = await fetch('./demo.spz');
-  if (!res.ok) { alert('demo.spz not found — use "載入 3DGS" to load your own file'); return; }
+  const DEMO_URL = 'https://github.com/jimmy107041131/3dgs-vfx-editor/releases/download/v0.1.0/demo.spz';
+  const res = await fetch(DEMO_URL);
+  if (!res.ok) { alert('Failed to load demo — use "載入 3DGS" to load your own file'); return; }
   const blob = await res.blob();
   const file = new File([blob], 'demo.spz');
 

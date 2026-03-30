@@ -2,7 +2,8 @@ import { LiteGraph } from 'litegraph.js';
 import { dyno } from '@sparkjsdev/spark';
 import * as THREE from 'three';
 
-const { Gsplat, dynoBlock, TransformGsplat, DynoVec3, DynoVec4, DynoFloat } = dyno;
+const { Gsplat, dynoBlock, splitGsplat, combineGsplat, TransformGsplat,
+        DynoVec3, DynoVec4, DynoFloat, mul } = dyno;
 
 function eulerToQuat(rx, ry, rz) {
   const e = new THREE.Euler(
@@ -19,16 +20,16 @@ export function registerTransformNode() {
     this.addInput('emitter',  'splat_emitter');
     this.addOutput('emitter', 'splat_emitter');
     this.title = 'Transform';
-    this.size = [200, 230];
+    this.size = [200, 290];
     this.properties = {
       px: 0, py: 0, pz: 0,
       rx: 0, ry: 0, rz: 0,
-      scale: 1,
+      sx: 1, sy: 1, sz: 1,
     };
 
     this._translateU = new DynoVec3({ value: new THREE.Vector3(0, 0, 0) });
     this._rotateU    = new DynoVec4({ value: new THREE.Vector4(0, 0, 0, 1) });
-    this._scaleU     = new DynoFloat({ value: 1 });
+    this._scaleU     = new DynoVec3({ value: new THREE.Vector3(1, 1, 1) });
 
     this._lastInput   = null;
     this._lastEmitter = null;
@@ -36,14 +37,14 @@ export function registerTransformNode() {
     const self = this;
     const updateT = () => {
       self._translateU.value = new THREE.Vector3(self.properties.px, self.properties.py, self.properties.pz);
-      self._lastInput = null; // force rebuild
+      self._lastInput = null;
     };
     const updateR = () => {
       self._rotateU.value = eulerToQuat(self.properties.rx, self.properties.ry, self.properties.rz);
       self._lastInput = null;
     };
     const updateS = () => {
-      self._scaleU.value = self.properties.scale;
+      self._scaleU.value = new THREE.Vector3(self.properties.sx, self.properties.sy, self.properties.sz);
       self._lastInput = null;
     };
 
@@ -55,11 +56,23 @@ export function registerTransformNode() {
     this.addWidget('number', 'rot X', 0, (v) => { self.properties.rx = v; updateR(); }, { step: 1 });
     this.addWidget('number', 'rot Y', 0, (v) => { self.properties.ry = v; updateR(); }, { step: 1 });
     this.addWidget('number', 'rot Z', 0, (v) => { self.properties.rz = v; updateR(); }, { step: 1 });
-    // Scale
-    this.addWidget('number', 'scale', 1, (v) => { self.properties.scale = v; updateS(); }, { step: 0.01, min: 0.01 });
+    // Scale (per-axis)
+    this.addWidget('number', 'scale X', 1, (v) => { self.properties.sx = v; updateS(); }, { step: 0.01, min: 0.001 });
+    this.addWidget('number', 'scale Y', 1, (v) => { self.properties.sy = v; updateS(); }, { step: 0.01, min: 0.001 });
+    this.addWidget('number', 'scale Z', 1, (v) => { self.properties.sz = v; updateS(); }, { step: 0.01, min: 0.001 });
   }
 
   TransformNode.title = 'Transform';
+  TransformNode.prototype.onConfigure = function () {
+    const p = this.properties;
+    this._translateU.value = new THREE.Vector3(p.px ?? 0, p.py ?? 0, p.pz ?? 0);
+    this._rotateU.value = eulerToQuat(p.rx ?? 0, p.ry ?? 0, p.rz ?? 0);
+    this._scaleU.value = new THREE.Vector3(p.sx ?? 1, p.sy ?? 1, p.sz ?? 1);
+    const vals = [p.px, p.py, p.pz, p.rx, p.ry, p.rz, p.sx, p.sy, p.sz];
+    vals.forEach((v, i) => { if (this.widgets?.[i]) this.widgets[i].value = v ?? (i >= 6 ? 1 : 0); });
+    this._lastInput = null;
+  };
+
   TransformNode.prototype.color = '#1a2a3a';
   TransformNode.prototype.bgcolor = '#1e2e3e';
 
@@ -78,10 +91,20 @@ export function registerTransformNode() {
       const scaleU     = this._scaleU;
 
       const buildFn = (gsplat) => {
-        const modified = upstreamBuildFn ? upstreamBuildFn(gsplat) : gsplat;
+        let modified = upstreamBuildFn ? upstreamBuildFn(gsplat) : gsplat;
+
+        // Per-axis scale: multiply center and scales by vec3
+        const outputs = splitGsplat(modified).outputs;
+        modified = combineGsplat({
+          gsplat: modified,
+          center: mul(outputs.center, scaleU.dynoOut()),
+          scales: mul(outputs.scales, scaleU.dynoOut()),
+        });
+
+        // Then apply rotate + translate (scale=1 since already applied)
         return new TransformGsplat({
           gsplat:    modified,
-          scale:     scaleU.dynoOut(),
+          scale:     new DynoFloat({ value: 1 }).dynoOut(),
           rotate:    rotateU.dynoOut(),
           translate: translateU.dynoOut(),
         }).dynoOut();

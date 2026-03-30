@@ -66,6 +66,8 @@ export function registerVec3MathNode() {
 
   Vec3MathNode.prototype.onConfigure = function () {
     this.inputs[1].type = B_TYPE[this.properties.op] || 'dyno_float';
+    if (this.widgets?.[0]) this.widgets[0].value = this.properties.op ?? 'vec3 × float';
+    this._lastOp = null;
   };
 
   LiteGraph.registerNodeType('3dgs/math/Vec3Math', Vec3MathNode);

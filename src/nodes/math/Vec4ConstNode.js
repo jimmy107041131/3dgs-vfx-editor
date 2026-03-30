@@ -26,6 +26,15 @@ export function registerVec4ConstNode() {
 
   Vec4ConstNode.title = 'Vec4';
 
+  Vec4ConstNode.prototype.onConfigure = function () {
+    const { x = 0, y = 0, z = 0, w = 1 } = this.properties;
+    this._uniform.value = new THREE.Vector4(x, y, z, w);
+    if (this.widgets?.[0]) this.widgets[0].value = x;
+    if (this.widgets?.[1]) this.widgets[1].value = y;
+    if (this.widgets?.[2]) this.widgets[2].value = z;
+    if (this.widgets?.[3]) this.widgets[3].value = w;
+  };
+
   Vec4ConstNode.prototype.onExecute = function () {
     this.setOutputData(0, this._builder);
   };

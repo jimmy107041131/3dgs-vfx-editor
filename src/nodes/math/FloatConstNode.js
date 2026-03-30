@@ -23,6 +23,12 @@ export function registerFloatConstNode() {
 
   FloatConstNode.title = 'Float';
 
+  FloatConstNode.prototype.onConfigure = function () {
+    const v = this.properties.value ?? 0;
+    this._uniform.value = v;
+    if (this.widgets?.[0]) this.widgets[0].value = v;
+  };
+
   FloatConstNode.prototype.onExecute = function () {
     this.setOutputData(0, this._builder);
   };

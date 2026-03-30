@@ -7,17 +7,34 @@ export function registerRendererNode() {
     this.addInput('emitter', 'splat_emitter');
     this.title = 'Renderer';
     this.size = [160, 50];
+    this.properties = { enabled: true };
 
     this._splatMesh    = null;
     this._lastPacked   = null;
     this._lastModifier = null;
+
+    this.addWidget('toggle', 'Enabled', true, (v) => {
+      this.properties.enabled = v;
+      if (!v && this._splatMesh) {
+        scene.remove(this._splatMesh);
+        this._splatMesh = null;
+        this._lastPacked = null;
+        this._lastModifier = null;
+      }
+    });
   }
 
   RendererNode.title = 'Renderer';
+  RendererNode.prototype.onConfigure = function () {
+    if (this.widgets?.[0]) this.widgets[0].value = this.properties.enabled ?? true;
+  };
+
   RendererNode.prototype.color   = '#1a3a1a';
   RendererNode.prototype.bgcolor = '#1e3e1e';
 
   RendererNode.prototype.onExecute = function () {
+    if (!this.properties.enabled) return;
+
     const emitter = this.getInputData(0);
     if (!emitter?.packedSplats) return;
 

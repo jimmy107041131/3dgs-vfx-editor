@@ -3,7 +3,7 @@ import { scene } from './scene.js';
 
 // ── Grid（XZ 平面，Y 為高度軸）────────────────────────────
 // Three.js 預設 Y-up，GridHelper 預設就在 XZ 平面，不需旋轉
-const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x2a2a2a);
+const gridHelper = new THREE.GridHelper(100, 100, 0x555555, 0x333333);
 scene.add(gridHelper);
 
 // ── XZ 軸線畫在網格上（Y=0 平面）────────────────────────

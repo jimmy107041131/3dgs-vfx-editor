@@ -30,6 +30,18 @@ export function registerRemapNode() {
 
   RemapNode.title = 'Remap';
 
+  RemapNode.prototype.onConfigure = function () {
+    const p = this.properties;
+    this._uInMin.value  = p.inMin  ?? 0;
+    this._uInMax.value  = p.inMax  ?? 1;
+    this._uOutMin.value = p.outMin ?? 0;
+    this._uOutMax.value = p.outMax ?? 1;
+    if (this.widgets?.[0]) this.widgets[0].value = p.inMin  ?? 0;
+    if (this.widgets?.[1]) this.widgets[1].value = p.inMax  ?? 1;
+    if (this.widgets?.[2]) this.widgets[2].value = p.outMin ?? 0;
+    if (this.widgets?.[3]) this.widgets[3].value = p.outMax ?? 1;
+  };
+
   RemapNode.prototype.onExecute = function () {
     const xB = this.getInputData(0);
     if (xB !== this._lastInput) {

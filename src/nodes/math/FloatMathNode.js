@@ -36,6 +36,11 @@ export function registerFloatMathNode() {
 
   FloatMathNode.title = 'Math';
 
+  FloatMathNode.prototype.onConfigure = function () {
+    if (this.widgets?.[0]) this.widgets[0].value = this.properties.op ?? '+';
+    this._lastOp = null;
+  };
+
   FloatMathNode.prototype.onExecute = function () {
     const aB = this.getInputData(0);
     const bB = this.getInputData(1);

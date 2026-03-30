@@ -24,6 +24,28 @@ export function registerSplatSourceNode() {
   SplatSourceNode.prototype.color = '#1a2a3a';
   SplatSourceNode.prototype.bgcolor = '#1e2e3e';
 
+  SplatSourceNode.prototype._loadFromUrl = function (url, fileName) {
+    this._fileName = fileName;
+    this.properties.fileName = fileName;
+    this._status = 'loading';
+    this._ready = false;
+    this.title = 'Loading...';
+    this.color = '#3a2a10';
+
+    this._splatMesh = new SplatMesh({ url });
+    this._splatMesh.packedSplats.initialized.then(() => {
+      this._ready = true;
+      this._status = 'ready';
+      const name = fileName.length > 24 ? fileName.slice(0, 22) + '…' : fileName;
+      this.title = name;
+      this.color = '#1a3a1a';
+    }).catch(() => {
+      this._status = 'error';
+      this.title = 'Error';
+      this.color = '#3a1a1a';
+    });
+  };
+
   SplatSourceNode.prototype._load = function (file) {
     this._fileName = file.name;
     this.properties.fileName = file.name;

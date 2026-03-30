@@ -9,4 +9,7 @@ export default defineConfig({
     assetsInlineLimit: 100000000,
     cssCodeSplit: false,
   },
+  optimizeDeps: {
+    exclude: ['@sparkjsdev/spark'],
+  },
 });

@@ -135,6 +135,34 @@ export function registerSubgraphNode() {
   DynoSubgraph.prototype             = Object.create(BuiltinSubgraph.prototype);
   DynoSubgraph.prototype.constructor = DynoSubgraph;
 
+  // Fix: subgraph.configure() → clear() removes internal Input/Output nodes,
+  // triggering onSubgraphRemovedInput/Output which calls removeInput/removeOutput
+  // on the outer node, destroying external ports AND deleting links from graph.links.
+  // Solution: mute the remove callbacks during configure so ports survive.
+  const origConfigure = DynoSubgraph.prototype.configure || LiteGraph.LGraphNode.prototype.configure;
+  DynoSubgraph.prototype.configure = function (info) {
+    // Mute remove callbacks — subgraph.clear() will fire these but we don't want them
+    const origRemovedIn  = this.subgraph.onInputRemoved;
+    const origRemovedOut = this.subgraph.onOutputRemoved;
+    // Also mute add callbacks — subgraph rebuild will re-add Input/Output nodes
+    // which would duplicate ports that are already restored from saved data
+    const origAddedIn  = this.subgraph.onInputAdded;
+    const origAddedOut = this.subgraph.onOutputAdded;
+
+    this.subgraph.onInputRemoved  = null;
+    this.subgraph.onOutputRemoved = null;
+    this.subgraph.onInputAdded    = null;
+    this.subgraph.onOutputAdded   = null;
+
+    origConfigure.call(this, info);
+
+    // Restore callbacks
+    this.subgraph.onInputRemoved  = origRemovedIn;
+    this.subgraph.onOutputRemoved = origRemovedOut;
+    this.subgraph.onInputAdded    = origAddedIn;
+    this.subgraph.onOutputAdded   = origAddedOut;
+  };
+
   DynoSubgraph.title            = 'Subgraph';
   DynoSubgraph.desc             = 'Reusable node group (dyno-aware)';
   DynoSubgraph.title_color      = '#334';

@@ -24,6 +24,13 @@ export function registerVec2ConstNode() {
 
   Vec2ConstNode.title = 'Vec2';
 
+  Vec2ConstNode.prototype.onConfigure = function () {
+    const { x = 0, y = 0 } = this.properties;
+    this._uniform.value = new THREE.Vector2(x, y);
+    if (this.widgets?.[0]) this.widgets[0].value = x;
+    if (this.widgets?.[1]) this.widgets[1].value = y;
+  };
+
   Vec2ConstNode.prototype.onExecute = function () {
     this.setOutputData(0, this._builder);
   };

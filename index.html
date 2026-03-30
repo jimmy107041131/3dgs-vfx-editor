@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3DGS Workshop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a1a; overflow: hidden; font-family: sans-serif; }
+    #canvas-container { position: fixed; top: 0; left: 0; right: 0; }
+    #divider {
+      position: fixed; left: 0; right: 0;
+      height: 6px; background: #333;
+      border-top: 1px solid #555; border-bottom: 1px solid #555;
+      cursor: row-resize;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+      user-select: none;
+    }
+    #divider:hover, #divider.dragging { background: #555; }
+    #divider-handle {
+      width: 32px; height: 3px;
+      background: #777; border-radius: 2px;
+      pointer-events: none;
+    }
+    #graph-container {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #222;
+    }
+    #graph-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 2px 8px;
+      background: #2a2a2a;
+      border-bottom: 1px solid #444;
+      height: 24px;
+    }
+    #graph-header span { color: #888; font-size: 11px; }
+    #btn-collapse {
+      background: none; border: none; color: #888;
+      cursor: pointer; font-size: 14px; padding: 0 4px;
+      line-height: 1;
+    }
+    #btn-collapse:hover { color: #eee; }
+    #litegraph-canvas { display: block; }
+    #toolbar-left {
+      position: fixed; top: 12px; left: 12px;
+      display: flex; gap: 8px; z-index: 5;
+    }
+    #toolbar-right {
+      position: fixed; top: 12px; right: 12px;
+      display: flex; gap: 8px; z-index: 5;
+    }
+    #toolbar-left button, #toolbar-right button {
+      padding: 6px 14px;
+      background: #333; color: #eee;
+      border: 1px solid #555; border-radius: 4px;
+      cursor: pointer; font-size: 13px;
+    }
+    #toolbar-left button:hover, #toolbar-right button:hover { background: #444; }
+    .gizmo-btn { padding: 6px 10px !important; font-size: 12px !important; }
+    .gizmo-btn.active { background: #2a4a2a !important; border-color: #4a8 !important; color: #8fa !important; }
+    .gizmo-btn:not(.active) { color: #666 !important; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div id="toolbar-left">
+    <button id="btn-load">載入 3DGS</button>
+    <button id="btn-sample">Load Sample</button>
+    <button id="btn-save">Save</button>
+    <button id="btn-open">Open</button>
+  </div>
+  <div id="toolbar-right">
+    <button id="btn-gizmos" class="gizmo-btn active">Gizmos</button>
+  </div>
+  <div id="divider"><div id="divider-handle"></div></div>
+  <div id="graph-container">
+    <div id="graph-header">
+      <span>Node Graph</span>
+      <button id="btn-collapse">▼</button>
+    </div>
+    <canvas id="litegraph-canvas"></canvas>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

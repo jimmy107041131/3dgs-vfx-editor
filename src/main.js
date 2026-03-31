@@ -447,7 +447,7 @@ function showLoading(name) {
   loadingOverlay.classList.add('active');
 }
 function updateLoading(progress) {
-  const pct = Math.round(progress * 100);
+  const pct = Math.min(100, Math.round(progress * 100));
   loadingBar.style.width = pct + '%';
   loadingPercent.textContent = pct + '%';
 }

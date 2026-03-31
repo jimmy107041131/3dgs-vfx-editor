@@ -141,6 +141,26 @@
       line-height: 1;
     }
     #help-close:hover { color: #eee; }
+    /* Settings panel */
+    #settings-panel {
+      display: none;
+      position: fixed; top: 52px; right: 12px;
+      width: 260px;
+      background: #2a2a2a; border: 1px solid #555; border-radius: 8px;
+      padding: 16px 18px; z-index: 20;
+      color: #ddd; font-size: 13px; line-height: 1.8;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    #settings-panel.open { display: block; }
+    #settings-close {
+      position: absolute; top: 8px; right: 12px;
+      cursor: pointer; font-size: 20px; color: #888; line-height: 1;
+    }
+    #settings-close:hover { color: #eee; }
+    #settings-panel h3 { margin-bottom: 12px; color: #fff; font-size: 15px; }
+    #settings-panel label { display: block; margin-top: 8px; color: #aaa; }
+    #settings-panel input[type=range] { width: 100%; margin: 4px 0 8px; }
+
     #help-panel h3 { margin-bottom: 12px; color: #fff; font-size: 15px; }
     #help-panel h4 { color: #8cf; margin: 10px 0 4px; font-size: 13px; }
     #help-panel ul { list-style: none; padding-left: 0; }
@@ -177,7 +197,16 @@
   </div>
   <div id="toolbar-right">
     <button id="btn-gizmos" class="gizmo-btn active">Gizmos</button>
+    <button id="btn-settings" class="gizmo-btn">⚙</button>
     <button id="btn-help">?</button>
+  </div>
+  <div id="settings-panel">
+    <div id="settings-close">&times;</div>
+    <h3>Performance</h3>
+    <label>Pixel Ratio: <span id="pr-val">1.0</span></label>
+    <input type="range" id="slider-pr" min="0.5" max="2" step="0.25" value="1">
+    <label>Render Quality: <span id="sd-val">2.24</span></label>
+    <input type="range" id="slider-sd" min="1.5" max="2.83" step="0.05" value="2.24">
   </div>
   <div id="help-panel">
     <div id="help-close">&times;</div>

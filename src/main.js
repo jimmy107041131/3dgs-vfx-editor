@@ -1,15 +1,21 @@
 import * as THREE from 'three';
 import { LGraph, LGraphCanvas, LiteGraph } from 'litegraph.js';
 import 'litegraph.js/css/litegraph.css';
+import { SparkRenderer } from '@sparkjsdev/spark';
 import { scene } from './scene.js';
 import { renderCornerGizmo, toggleGrid, toggleAxes, toggleCorner } from './gizmos.js';
 import { registerNodes } from './nodes/index.js';
 
 // ── Renderer ──────────────────────────────────────────────
 const container = document.getElementById('canvas-container');
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(devicePixelRatio);
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+let renderScale = 1.0;
+renderer.setPixelRatio(renderScale);
 container.appendChild(renderer.domElement);
+
+// ── SparkRenderer (explicit, so we can control maxStdDev) ──
+const spark = new SparkRenderer({ renderer, maxStdDev: Math.sqrt(5) });
+scene.add(spark);
 
 const camera = new THREE.PerspectiveCamera(60, 1, 0.01, 1000);
 camera.position.set(0, 3, 5);
@@ -125,7 +131,9 @@ function applyLayout() {
   dividerEl.style.height = divH + 'px';
   graphEl.style.height   = gh + 'px';
 
-  renderer.setSize(window.innerWidth, viewH);
+  renderer.setSize(window.innerWidth * renderScale, viewH * renderScale, false);
+  renderer.domElement.style.width  = window.innerWidth + 'px';
+  renderer.domElement.style.height = viewH + 'px';
   camera.aspect = window.innerWidth / viewH;
   camera.updateProjectionMatrix();
 
@@ -164,10 +172,39 @@ document.getElementById('btn-collapse').addEventListener('click', () => {
   if (!collapsed) resizeLG();
 });
 
+// ── Settings panel ───────────────────────────────────────
+const settingsPanel = document.getElementById('settings-panel');
+const sliderPR = document.getElementById('slider-pr');
+const sliderSD = document.getElementById('slider-sd');
+const prVal = document.getElementById('pr-val');
+const sdVal = document.getElementById('sd-val');
+
+sliderPR.max = devicePixelRatio;
+sliderPR.addEventListener('input', () => {
+  renderScale = parseFloat(sliderPR.value);
+  prVal.textContent = renderScale.toFixed(2);
+  applyLayout();
+});
+
+sliderSD.addEventListener('input', () => {
+  const v = parseFloat(sliderSD.value);
+  sdVal.textContent = v.toFixed(2);
+  spark.maxStdDev = v;
+});
+
+document.getElementById('btn-settings').addEventListener('click', () => {
+  settingsPanel.classList.toggle('open');
+  helpPanel.classList.remove('open');
+});
+document.getElementById('settings-close').addEventListener('click', () => {
+  settingsPanel.classList.remove('open');
+});
+
 // ── Help panel toggle ────────────────────────────────────
 const helpPanel = document.getElementById('help-panel');
 document.getElementById('btn-help').addEventListener('click', () => {
   helpPanel.classList.toggle('open');
+  settingsPanel.classList.remove('open');
 });
 document.getElementById('help-close').addEventListener('click', () => {
   helpPanel.classList.remove('open');
@@ -628,6 +665,6 @@ function updateStats(now) {
 renderer.setAnimationLoop((time) => {
   applyKeyboardMovement();
   renderer.render(scene, camera);
-  renderCornerGizmo(renderer, camera);
+  renderCornerGizmo(renderer, camera, renderScale);
   updateStats(time);
 });

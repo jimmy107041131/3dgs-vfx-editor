@@ -49,16 +49,17 @@ export function toggleCorner() {
 }
 
 // ── Corner gizmo render（每幀呼叫）───────────────────────
-export function renderCornerGizmo(renderer, camera) {
+export function renderCornerGizmo(renderer, camera, scale = 1) {
   if (!gizmoState.corner) return;
 
   gizmoAxes.quaternion.copy(camera.quaternion).invert();
 
-  const size   = 100;
+  const size   = Math.round(100 * scale);
+  const offset = Math.round(10 * scale);
   const canvas = renderer.domElement;
 
-  renderer.setViewport(10, 10, size, size);
-  renderer.setScissor(10, 10, size, size);
+  renderer.setViewport(offset, offset, size, size);
+  renderer.setScissor(offset, offset, size, size);
   renderer.setScissorTest(true);
   renderer.autoClear = false;
   renderer.clearDepth();

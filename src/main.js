@@ -400,7 +400,7 @@ const DEMOS = [
   {
     name: 'Star Ocean',
     json: `${ASSETS}/StarOcean/StarOcean.json`,
-    splats: [{ name: 'Ocean_High.splat', url: `${ASSETS}/StarOcean/Ocean_High.splat` }],
+    splats: [{ name: 'Ocean_High.spz', url: `${ASSETS}/StarOcean/Ocean_High.spz` }],
   },
 ];
 

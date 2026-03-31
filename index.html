@@ -64,6 +64,28 @@
       pointer-events: none; line-height: 1.6;
     }
 
+    /* Loading overlay */
+    #loading-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,0.6);
+      align-items: center; justify-content: center;
+    }
+    #loading-overlay.active { display: flex; }
+    #loading-box {
+      background: #2a2a2a; border: 1px solid #555; border-radius: 10px;
+      padding: 24px 36px; text-align: center; min-width: 280px;
+    }
+    #loading-text { color: #ddd; font-size: 14px; margin-bottom: 12px; }
+    #loading-bar-bg {
+      height: 8px; background: #444; border-radius: 4px; overflow: hidden;
+    }
+    #loading-bar {
+      height: 100%; width: 0%; background: #4a8; border-radius: 4px;
+      transition: width 0.2s;
+    }
+    #loading-percent { color: #888; font-size: 12px; margin-top: 6px; }
+
     /* Search box overrides */
     .litegraph.litesearchbox { background-color: #2a2a2a; border: 1px solid #555; }
     .litegraph.litesearchbox .name { color: #fff; }
@@ -132,6 +154,13 @@
 <body>
   <div id="canvas-container"></div>
   <div id="stats-hud"></div>
+  <div id="loading-overlay">
+    <div id="loading-box">
+      <div id="loading-text">Loading demo...</div>
+      <div id="loading-bar-bg"><div id="loading-bar"></div></div>
+      <div id="loading-percent">0%</div>
+    </div>
+  </div>
   <div id="toolbar-left">
     <div id="file-wrapper" class="dropdown-wrapper">
       <button id="btn-file">File ▾</button>

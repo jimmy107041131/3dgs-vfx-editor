@@ -24,7 +24,7 @@ export function registerSplatSourceNode() {
   SplatSourceNode.prototype.color = '#1a2a3a';
   SplatSourceNode.prototype.bgcolor = '#1e2e3e';
 
-  SplatSourceNode.prototype._loadFromUrl = function (url, fileName) {
+  SplatSourceNode.prototype._loadFromUrl = function (url, fileName, onProgress) {
     this._fileName = fileName;
     this.properties.fileName = fileName;
     this._status = 'loading';
@@ -32,13 +32,36 @@ export function registerSplatSourceNode() {
     this.title = 'Loading...';
     this.color = '#3a2a10';
 
-    this._splatMesh = new SplatMesh({ url });
-    this._splatMesh.packedSplats.initialized.then(() => {
+    // Fetch with progress, then load from bytes
+    fetch(url).then(res => {
+      if (!res.ok) throw new Error('fetch failed');
+      const total = parseInt(res.headers.get('content-length') || '0', 10);
+      const reader = res.body.getReader();
+      const chunks = [];
+      let loaded = 0;
+
+      const pump = ({ done, value }) => {
+        if (done) {
+          const bytes = new Uint8Array(loaded);
+          let offset = 0;
+          for (const c of chunks) { bytes.set(c, offset); offset += c.length; }
+          this._splatMesh = new SplatMesh({ fileBytes: bytes, fileName });
+          return this._splatMesh.packedSplats.initialized;
+        }
+        chunks.push(value);
+        loaded += value.length;
+        if (onProgress && total) onProgress(loaded / total);
+        return reader.read().then(pump);
+      };
+
+      return reader.read().then(pump);
+    }).then(() => {
       this._ready = true;
       this._status = 'ready';
       const name = fileName.length > 24 ? fileName.slice(0, 22) + '…' : fileName;
       this.title = name;
       this.color = '#1a3a1a';
+      if (onProgress) onProgress(1);
     }).catch(() => {
       this._status = 'error';
       this.title = 'Error';
@@ -55,7 +78,7 @@ export function registerSplatSourceNode() {
     this.color = '#3a2a10';
 
     const url = URL.createObjectURL(file);
-    this._splatMesh = new SplatMesh({ url });
+    this._splatMesh = new SplatMesh({ url, fileName: file.name });
     this._splatMesh.packedSplats.initialized.then(() => {
       this._ready = true;
       this._status = 'ready';

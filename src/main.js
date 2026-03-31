@@ -400,7 +400,7 @@ const DEMOS = [
   {
     name: 'Star Ocean',
     json: `${ASSETS}/StarOcean/StarOcean.json`,
-    splats: [{ name: 'Ocean_High.ply', url: `${ASSETS}/StarOcean/Ocean_High.ply` }],
+    splats: [{ name: 'Ocean_High.splat', url: `${ASSETS}/StarOcean/Ocean_High.splat` }],
   },
 ];
 
@@ -434,15 +434,37 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('#file-wrapper'))  fileDropdown.classList.remove('open');
 });
 
+// Loading overlay helpers
+const loadingOverlay = document.getElementById('loading-overlay');
+const loadingBar     = document.getElementById('loading-bar');
+const loadingPercent = document.getElementById('loading-percent');
+const loadingText    = document.getElementById('loading-text');
+
+function showLoading(name) {
+  loadingText.textContent = `Loading ${name}...`;
+  loadingBar.style.width = '0%';
+  loadingPercent.textContent = '0%';
+  loadingOverlay.classList.add('active');
+}
+function updateLoading(progress) {
+  const pct = Math.round(progress * 100);
+  loadingBar.style.width = pct + '%';
+  loadingPercent.textContent = pct + '%';
+}
+function hideLoading() {
+  loadingOverlay.classList.remove('active');
+}
+
 async function loadDemo(index) {
   const demo = DEMOS[index];
   if (!demo) return;
 
   btnDemos.textContent = 'Loading…';
   btnDemos.disabled = true;
+  showLoading(demo.name);
 
   try {
-    // Only fetch the JSON — splat files are loaded directly by SplatMesh via URL
+    // Only fetch the JSON — splat files are streamed with progress
     const jsonRes = await fetch(demo.json);
     if (!jsonRes.ok) throw new Error('Failed to fetch project JSON');
 
@@ -459,17 +481,28 @@ async function loadDemo(index) {
     graph.start();
     lgCanvas.setDirty(true, true);
 
-    // Match splat files to SplatSource nodes — load directly from URL
+    // Match splat files to SplatSource nodes — load with progress
     const sources = graph._nodes.filter(n => n.type === '3dgs/SplatSource');
     const unmatched = [];
+    const loadPromises = [];
     for (const node of sources) {
       const splatInfo = demo.splats.find(s => s.name === node._fileName);
       if (splatInfo) {
-        node._loadFromUrl(splatInfo.url, splatInfo.name);
+        node._loadFromUrl(splatInfo.url, splatInfo.name, updateLoading);
+        loadPromises.push(new Promise(resolve => {
+          const check = setInterval(() => {
+            if (node._status === 'ready' || node._status === 'error') {
+              clearInterval(check);
+              resolve();
+            }
+          }, 200);
+        }));
       } else if (node._fileName) {
         unmatched.push(node._fileName);
       }
     }
+    await Promise.all(loadPromises);
+    hideLoading();
     if (unmatched.length > 0) {
       alert('Missing splat files in demo:\n\n' + unmatched.join('\n'));
     }

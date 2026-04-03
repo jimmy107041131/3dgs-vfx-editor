@@ -8,11 +8,28 @@ let _lgCanvas = null;
 let _repairSubgraphLinks = null;
 
 // ── Save format migration ────────────────────────────────
+function applyTypeMap(nodes, map) {
+  for (const n of nodes) {
+    if (map[n.type] !== undefined) {
+      if (map[n.type] === null) n._deleted = true;
+      else n.type = map[n.type];
+    }
+    // Recurse into subgraph inner nodes
+    if (n.subgraph?.nodes) {
+      n.subgraph.nodes = applyTypeMap(n.subgraph.nodes, map);
+    }
+  }
+  return nodes.filter(n => !n._deleted);
+}
+
 function migrateGraph(save) {
   const ver = save.version || 1;
   const graphData = save.graph || save;
-  if (ver < 2 && graphData.nodes) {
-    const TYPE_MAP = {
+  if (!graphData.nodes) return graphData;
+
+  // v1 → v2: GPU path rename + old Transform = SplatTransform
+  if (ver < 2) {
+    graphData.nodes = applyTypeMap(graphData.nodes, {
       '3dgs/math/Float': '3dgs/GPU/math/Float (GPU)',
       '3dgs/math/Vec2': '3dgs/GPU/math/Vec2 (GPU)',
       '3dgs/math/Vec3': '3dgs/GPU/math/Vec3 (GPU)',
@@ -38,22 +55,39 @@ function migrateGraph(save) {
       '3dgs/utility/MakeVec2': '3dgs/GPU/utility/MakeVec2 (GPU)',
       '3dgs/utility/MakeVec3': '3dgs/GPU/utility/MakeVec3 (GPU)',
       '3dgs/utility/MakeVec4': '3dgs/GPU/utility/MakeVec4 (GPU)',
-      '3dgs/utility/AnimatedFloat': null, // deleted
-      '3dgs/Transform': '3dgs/SplatTransform', // v1 Transform was splat transform
-      '3dgs/CPU/utility/BreakTransform': '3dgs/CPU/utility/BreakTransform (CPU)',
-      '3dgs/CPU/utility/MakeTransform': '3dgs/CPU/utility/MakeTransform (CPU)',
-    };
-    for (const n of graphData.nodes) {
-      if (TYPE_MAP[n.type] !== undefined) {
-        if (TYPE_MAP[n.type] === null) {
-          n._deleted = true;
-        } else {
-          n.type = TYPE_MAP[n.type];
-        }
-      }
-    }
-    graphData.nodes = graphData.nodes.filter(n => !n._deleted);
+      '3dgs/utility/AnimatedFloat': null,
+      '3dgs/Transform': '3dgs/SplatTransform',
+    });
   }
+
+  // v2 → v3: category reorganization
+  if (ver < 3) {
+    graphData.nodes = applyTypeMap(graphData.nodes, {
+      '3dgs/Transform': 'Transform/Transform',
+      '3dgs/3D Model': '3D Model/3D Model',
+      '3dgs/Subgraph': 'Subgraph/Subgraph',
+      '3dgs/subgraph/Input': 'Subgraph/Input',
+      '3dgs/subgraph/Output': 'Subgraph/Output',
+      '3dgs/bridge/FloatToGPU': 'Bridge/FloatToGPU',
+      '3dgs/bridge/Vec3ToGPU': 'Bridge/Vec3ToGPU',
+      '3dgs/CPU/utility/BreakTransform': 'CPU/utility/BreakTransform (CPU)',
+      '3dgs/CPU/utility/MakeTransform': 'CPU/utility/MakeTransform (CPU)',
+      '3dgs/CPU/utility/BreakTransform (CPU)': 'CPU/utility/BreakTransform (CPU)',
+      '3dgs/CPU/utility/MakeTransform (CPU)': 'CPU/utility/MakeTransform (CPU)',
+      '3dgs/CPU/utility/BreakVec3 (CPU)': 'CPU/utility/BreakVec3 (CPU)',
+      '3dgs/CPU/utility/MakeVec3 (CPU)': 'CPU/utility/MakeVec3 (CPU)',
+      '3dgs/CPU/math/Float (CPU)': 'CPU/math/Float (CPU)',
+      '3dgs/CPU/math/Vec3 (CPU)': 'CPU/math/Vec3 (CPU)',
+      '3dgs/CPU/math/Math (CPU)': 'CPU/math/Math (CPU)',
+      '3dgs/CPU/math/Vec3Math (CPU)': 'CPU/math/Vec3Math (CPU)',
+      '3dgs/CPU/math/RotateVec3 (CPU)': 'CPU/math/RotateVec3 (CPU)',
+      '3dgs/CPU/math/Sin (CPU)': 'CPU/math/Sin (CPU)',
+      '3dgs/CPU/math/Cos (CPU)': 'CPU/math/Cos (CPU)',
+      '3dgs/CPU/math/Time (CPU)': 'CPU/math/Time (CPU)',
+      '3dgs/CPU/math/Lerp (CPU)': 'CPU/math/Lerp (CPU)',
+    });
+  }
+
   return graphData;
 }
 
@@ -86,7 +120,7 @@ export function initProjectIO(graph, lgCanvas, { repairSubgraphLinks }) {
       const nMapGet    = LiteGraph.createNode('3dgs/MapGet');
       const nMapSet    = LiteGraph.createNode('3dgs/MapSet');
       const nSplatTf   = LiteGraph.createNode('3dgs/SplatTransform');
-      const nTransform = LiteGraph.createNode('3dgs/Transform');
+      const nTransform = LiteGraph.createNode('Transform/Transform');
       const nRenderer  = LiteGraph.createNode('3dgs/Renderer');
 
       nSource.pos    = [60,   rowY];
@@ -261,7 +295,7 @@ export function initProjectIO(graph, lgCanvas, { repairSubgraphLinks }) {
         n._v = 1;
       }
     }
-    const save = { version: 2, splatFiles, graph: data };
+    const save = { version: 3, splatFiles, graph: data };
     const blob = new Blob([JSON.stringify(save)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);

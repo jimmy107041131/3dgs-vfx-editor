@@ -24,5 +24,5 @@ export function registerMathCpuNode() {
     const fn = OPS[this.properties.op] || OPS['+'];
     this.setOutputData(0, fn(a, b));
   };
-  LiteGraph.registerNodeType('3dgs/CPU/math/Math (CPU)', MathCpuNode);
+  LiteGraph.registerNodeType('CPU/math/Math (CPU)', MathCpuNode);
 }

@@ -50,5 +50,5 @@ export function registerVec3MathCpuNode() {
     }
     this.setOutputData(0, result);
   };
-  LiteGraph.registerNodeType('3dgs/CPU/math/Vec3Math (CPU)', Vec3MathCpuNode);
+  LiteGraph.registerNodeType('CPU/math/Vec3Math (CPU)', Vec3MathCpuNode);
 }

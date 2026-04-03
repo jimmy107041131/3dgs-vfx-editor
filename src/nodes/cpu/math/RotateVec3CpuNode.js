@@ -24,5 +24,5 @@ export function registerRotateVec3CpuNode() {
     const quat = new THREE.Quaternion().setFromEuler(euler);
     this.setOutputData(0, pos.clone().applyQuaternion(quat));
   };
-  LiteGraph.registerNodeType('3dgs/CPU/math/RotateVec3 (CPU)', RotateVec3CpuNode);
+  LiteGraph.registerNodeType('CPU/math/RotateVec3 (CPU)', RotateVec3CpuNode);
 }

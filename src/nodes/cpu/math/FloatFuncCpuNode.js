@@ -19,7 +19,7 @@ function makeCpuFuncNode({ name, fn }) {
     const x = this.getInputData(0) ?? 0;
     this.setOutputData(0, fn(x));
   };
-  LiteGraph.registerNodeType('3dgs/CPU/math/' + name + ' (CPU)', Node);
+  LiteGraph.registerNodeType('CPU/math/' + name + ' (CPU)', Node);
 }
 
 export function registerFloatFuncCpuNode() {

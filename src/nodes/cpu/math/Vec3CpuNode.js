@@ -24,5 +24,5 @@ export function registerVec3CpuNode() {
   Vec3CpuNode.prototype.onExecute = function () {
     this.setOutputData(0, new THREE.Vector3(this.properties.x, this.properties.y, this.properties.z));
   };
-  LiteGraph.registerNodeType('3dgs/CPU/math/Vec3 (CPU)', Vec3CpuNode);
+  LiteGraph.registerNodeType('CPU/math/Vec3 (CPU)', Vec3CpuNode);
 }

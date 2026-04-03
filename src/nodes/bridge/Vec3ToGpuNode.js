@@ -25,5 +25,5 @@ export function registerVec3ToGpuNode() {
     }
     this.setOutputData(0, this._builder);
   };
-  LiteGraph.registerNodeType('3dgs/bridge/Vec3ToGPU', Vec3ToGpuNode);
+  LiteGraph.registerNodeType('Bridge/Vec3ToGPU', Vec3ToGpuNode);
 }

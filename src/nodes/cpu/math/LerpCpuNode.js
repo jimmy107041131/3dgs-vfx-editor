@@ -18,5 +18,5 @@ export function registerLerpCpuNode() {
     const t = this.getInputData(2) ?? 0.5;
     this.setOutputData(0, a + (b - a) * t);
   };
-  LiteGraph.registerNodeType('3dgs/CPU/math/Lerp (CPU)', LerpCpuNode);
+  LiteGraph.registerNodeType('CPU/math/Lerp (CPU)', LerpCpuNode);
 }

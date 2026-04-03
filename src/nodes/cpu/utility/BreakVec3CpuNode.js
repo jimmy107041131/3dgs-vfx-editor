@@ -19,5 +19,5 @@ export function registerBreakVec3CpuNode() {
     this.setOutputData(1, v.y);
     this.setOutputData(2, v.z);
   };
-  LiteGraph.registerNodeType('3dgs/CPU/utility/BreakVec3 (CPU)', BreakVec3CpuNode);
+  LiteGraph.registerNodeType('CPU/utility/BreakVec3 (CPU)', BreakVec3CpuNode);
 }

@@ -15,5 +15,5 @@ export function registerTimeCpuNode() {
     if (_startTime === null) _startTime = performance.now();
     this.setOutputData(0, (performance.now() - _startTime) / 1000);
   };
-  LiteGraph.registerNodeType('3dgs/CPU/math/Time (CPU)', TimeCpuNode);
+  LiteGraph.registerNodeType('CPU/math/Time (CPU)', TimeCpuNode);
 }

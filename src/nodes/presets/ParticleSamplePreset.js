@@ -1,7 +1,7 @@
 import { LiteGraph } from 'litegraph.js';
 
 function addSubIn(g, x, y, type, name) {
-  const n = LiteGraph.createNode('3dgs/subgraph/Input');
+  const n = LiteGraph.createNode('Subgraph/Input');
   g.add(n); n.pos = [x, y];
   n.setProperty('type', type);
   n.setProperty('name', name);
@@ -9,7 +9,7 @@ function addSubIn(g, x, y, type, name) {
 }
 
 function addSubOut(g, x, y, type, name) {
-  const n = LiteGraph.createNode('3dgs/subgraph/Output');
+  const n = LiteGraph.createNode('Subgraph/Output');
   g.add(n); n.pos = [x, y];
   n.setProperty('type', type);
   n.setProperty('name', name);
@@ -52,7 +52,7 @@ function buildParticleMaskGraph(g) {
 }
 
 export function registerParticleSamplePreset() {
-  const Base = LiteGraph.registered_node_types['3dgs/Subgraph']
+  const Base = LiteGraph.registered_node_types['Subgraph/Subgraph']
             || LiteGraph.registered_node_types['graph/subgraph'];
   if (!Base) return;
 
@@ -66,8 +66,8 @@ export function registerParticleSamplePreset() {
   RandomMaskPreset.prototype.constructor = RandomMaskPreset;
   RandomMaskPreset.title                 = 'Random Mask';
   RandomMaskPreset.desc                  = 'Per-splat random binary mask (0/1) controlled by density';
-  RandomMaskPreset.input_node_type       = '3dgs/subgraph/Input';
-  RandomMaskPreset.output_node_type      = '3dgs/subgraph/Output';
+  RandomMaskPreset.input_node_type       = 'Subgraph/Input';
+  RandomMaskPreset.output_node_type      = 'Subgraph/Output';
 
   LiteGraph.registerNodeType('3dgs/presets/RandomMask', RandomMaskPreset);
 }

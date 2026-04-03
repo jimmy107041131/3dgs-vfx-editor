@@ -106,5 +106,5 @@ export function registerModelNode() {
     this._disposeModel();
   };
 
-  LiteGraph.registerNodeType('3dgs/3D Model', ModelNode);
+  LiteGraph.registerNodeType('3D Model/3D Model', ModelNode);
 }

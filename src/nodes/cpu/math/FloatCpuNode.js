@@ -18,5 +18,5 @@ export function registerFloatCpuNode() {
   FloatCpuNode.prototype.onExecute = function () {
     this.setOutputData(0, this.properties.value);
   };
-  LiteGraph.registerNodeType('3dgs/CPU/math/Float (CPU)', FloatCpuNode);
+  LiteGraph.registerNodeType('CPU/math/Float (CPU)', FloatCpuNode);
 }

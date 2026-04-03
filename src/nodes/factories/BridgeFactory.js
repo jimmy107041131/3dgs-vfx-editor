@@ -10,7 +10,7 @@ const { DynoFloat, DynoVec2, DynoVec3, DynoVec4 } = dyno;
  */
 function createBridgeNode({ name, jsType, dynoType, DynoClass, defaultValue, copyFn }) {
   const title = name;
-  const path = `3dgs/bridge/${name}`;
+  const path = `Bridge/${name}`;
 
   function NodeCtor() {
     this.addInput('value', jsType);

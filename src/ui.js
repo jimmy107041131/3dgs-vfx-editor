@@ -6,6 +6,8 @@ let _camera = null;
 let _getRenderScale = null;
 let _setRenderScale = null;
 let _spark = null;
+let _composer = null;
+let _bloomPass = null;
 let _resizeLG = null;
 
 // ── Panel layout ───────────────────────────────────────────
@@ -36,6 +38,8 @@ function applyLayout() {
   _renderer.domElement.style.height = viewH + 'px';
   _camera.aspect = window.innerWidth / viewH;
   _camera.updateProjectionMatrix();
+
+  if (_composer) _composer.setSize(window.innerWidth * renderScale, viewH * renderScale);
 
   // Stats HUD: just below corner gizmo
   const statsEl = document.getElementById('stats-hud');
@@ -77,12 +81,14 @@ document.getElementById('btn-collapse').addEventListener('click', () => {
 const settingsPanel = document.getElementById('settings-panel');
 const helpPanel = document.getElementById('help-panel');
 
-export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark, resizeLG }) {
+export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark, composer, bloomPass, resizeLG }) {
   _renderer = renderer;
   _camera = camera;
   _getRenderScale = getRenderScale;
   _setRenderScale = setRenderScale;
   _spark = spark;
+  _composer = composer;
+  _bloomPass = bloomPass;
   _resizeLG = resizeLG;
 
   const sliderPR = document.getElementById('slider-pr');
@@ -102,6 +108,30 @@ export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark
     const v = parseFloat(sliderSD.value);
     sdVal.textContent = v.toFixed(2);
     _spark.maxStdDev = v;
+  });
+
+  // Bloom sliders
+  const sliderBStr = document.getElementById('slider-bloom-str');
+  const sliderBRad = document.getElementById('slider-bloom-rad');
+  const sliderBThr = document.getElementById('slider-bloom-thr');
+  const bStrVal = document.getElementById('bloom-str-val');
+  const bRadVal = document.getElementById('bloom-rad-val');
+  const bThrVal = document.getElementById('bloom-thr-val');
+
+  sliderBStr.addEventListener('input', () => {
+    const v = parseFloat(sliderBStr.value);
+    bStrVal.textContent = v.toFixed(2);
+    if (_bloomPass) _bloomPass.strength = v;
+  });
+  sliderBRad.addEventListener('input', () => {
+    const v = parseFloat(sliderBRad.value);
+    bRadVal.textContent = v.toFixed(2);
+    if (_bloomPass) _bloomPass.radius = v;
+  });
+  sliderBThr.addEventListener('input', () => {
+    const v = parseFloat(sliderBThr.value);
+    bThrVal.textContent = v.toFixed(2);
+    if (_bloomPass) _bloomPass.threshold = v;
   });
 
   document.getElementById('btn-settings').addEventListener('click', () => {

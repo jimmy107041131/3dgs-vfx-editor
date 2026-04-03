@@ -4,13 +4,13 @@ import { LiteGraph } from 'litegraph.js';
 // Internal: split both → add each component → reassemble
 function buildPositionOffsetGraph(graph) {
   // ── Inputs ──
-  const inCenter = LiteGraph.createNode('3dgs/subgraph/Input');
+  const inCenter = LiteGraph.createNode('Subgraph/Input');
   graph.add(inCenter);
   inCenter.pos = [50, 200];
   inCenter.setProperty('type', 'dyno_vec3');
   inCenter.setProperty('name', 'center');
 
-  const inOffset = LiteGraph.createNode('3dgs/subgraph/Input');
+  const inOffset = LiteGraph.createNode('Subgraph/Input');
   graph.add(inOffset);
   inOffset.pos = [50, 50];
   inOffset.setProperty('type', 'dyno_vec3');
@@ -56,7 +56,7 @@ function buildPositionOffsetGraph(graph) {
   addZ.connect(0, make, 2);
 
   // ── Output ──
-  const out = LiteGraph.createNode('3dgs/subgraph/Output');
+  const out = LiteGraph.createNode('Subgraph/Output');
   graph.add(out);
   out.pos = [940, 170];
   out.setProperty('type', 'dyno_vec3');
@@ -65,7 +65,7 @@ function buildPositionOffsetGraph(graph) {
 }
 
 export function registerPositionOffsetPreset() {
-  const Base = LiteGraph.registered_node_types['3dgs/Subgraph']
+  const Base = LiteGraph.registered_node_types['Subgraph/Subgraph']
             || LiteGraph.registered_node_types['graph/subgraph'];
   if (!Base) return;
 
@@ -79,8 +79,8 @@ export function registerPositionOffsetPreset() {
   PositionOffsetPreset.prototype.constructor = PositionOffsetPreset;
   PositionOffsetPreset.title                 = 'Position Offset';
   PositionOffsetPreset.desc                  = 'Add offset vec3 to center';
-  PositionOffsetPreset.input_node_type       = '3dgs/subgraph/Input';
-  PositionOffsetPreset.output_node_type      = '3dgs/subgraph/Output';
+  PositionOffsetPreset.input_node_type       = 'Subgraph/Input';
+  PositionOffsetPreset.output_node_type      = 'Subgraph/Output';
 
   LiteGraph.registerNodeType('3dgs/presets/PositionOffset', PositionOffsetPreset);
 }

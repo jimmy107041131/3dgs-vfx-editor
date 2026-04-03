@@ -19,5 +19,5 @@ export function registerMakeVec3CpuNode() {
     const z = this.getInputData(2) ?? 0;
     this.setOutputData(0, new THREE.Vector3(x, y, z));
   };
-  LiteGraph.registerNodeType('3dgs/CPU/utility/MakeVec3 (CPU)', MakeVec3CpuNode);
+  LiteGraph.registerNodeType('CPU/utility/MakeVec3 (CPU)', MakeVec3CpuNode);
 }

@@ -61,7 +61,7 @@ DynoSubInput.prototype.getTitle = function () {
   return this.flags.collapsed ? this.properties.name : this.title;
 };
 
-LiteGraph.registerNodeType('3dgs/subgraph/Input', DynoSubInput);
+LiteGraph.registerNodeType('Subgraph/Input', DynoSubInput);
 
 
 // ── Subgraph Output ─────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ DynoSubOutput.prototype.getTitle = function () {
   return this.flags.collapsed ? this.properties.name : this.title;
 };
 
-LiteGraph.registerNodeType('3dgs/subgraph/Output', DynoSubOutput);
+LiteGraph.registerNodeType('Subgraph/Output', DynoSubOutput);
 
 
 // ── Dyno Subgraph ───────────────────────────────────────────────────────────
@@ -170,8 +170,8 @@ export function registerSubgraphNode() {
   DynoSubgraph.title            = 'Subgraph';
   DynoSubgraph.desc             = 'Reusable node group (dyno-aware)';
   DynoSubgraph.title_color      = '#334';
-  DynoSubgraph.input_node_type  = '3dgs/subgraph/Input';
-  DynoSubgraph.output_node_type = '3dgs/subgraph/Output';
+  DynoSubgraph.input_node_type  = 'Subgraph/Input';
+  DynoSubgraph.output_node_type = 'Subgraph/Output';
 
-  LiteGraph.registerNodeType('3dgs/Subgraph', DynoSubgraph);
+  LiteGraph.registerNodeType('Subgraph/Subgraph', DynoSubgraph);
 }

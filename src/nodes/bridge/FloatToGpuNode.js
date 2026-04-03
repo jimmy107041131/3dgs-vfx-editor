@@ -20,5 +20,5 @@ export function registerFloatToGpuNode() {
     this._uniform.value = v;
     this.setOutputData(0, this._builder);
   };
-  LiteGraph.registerNodeType('3dgs/bridge/FloatToGPU', FloatToGpuNode);
+  LiteGraph.registerNodeType('Bridge/FloatToGPU', FloatToGpuNode);
 }

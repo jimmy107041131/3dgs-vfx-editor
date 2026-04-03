@@ -1,32 +1,47 @@
 import * as THREE from 'three';
+import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { scene } from './scene.js';
 
 // ── Grid（XZ 平面，Y 為高度軸）────────────────────────────
-// Three.js 預設 Y-up，GridHelper 預設就在 XZ 平面，不需旋轉
 const gridHelper = new THREE.GridHelper(100, 100, 0x555555, 0x333333);
 scene.add(gridHelper);
 
-// ── XZ 軸線畫在網格上（Y=0 平面）────────────────────────
-// X 軸（紅）和 Z 軸（藍），Y 為高度軸不畫
-const axisPoints = new Float32Array([
-  -50, 0,   0,   50, 0,   0,  // X axis
-    0, 0, -50,    0, 0,  50,  // Z axis
+// ── XZ 軸線（粗線，Line2）───────────────────────────────
+const axisGeo = new LineSegmentsGeometry();
+axisGeo.setPositions([
+  -50, 0, 0, 50, 0, 0,  // X axis
+  0, 0, -50, 0, 0, 50,  // Z axis
 ]);
-const axisColors = new Float32Array([
-  1, 0.2, 0.2,  1, 0.2, 0.2,  // X: red
-  0.2, 0.4, 1,  0.2, 0.4, 1,  // Z: blue
+axisGeo.setColors([
+  1, 0.2, 0.2, 1, 0.2, 0.2,  // X: red
+  0.2, 0.4, 1, 0.2, 0.4, 1,  // Z: blue
 ]);
-const axisGeo = new THREE.BufferGeometry();
-axisGeo.setAttribute('position', new THREE.BufferAttribute(axisPoints, 3));
-axisGeo.setAttribute('color',    new THREE.BufferAttribute(axisColors, 3));
-
-const axisMat = new THREE.LineBasicMaterial({ vertexColors: true, linewidth: 2 });
-const axisLines = new THREE.LineSegments(axisGeo, axisMat);
+const axisMat = new LineMaterial({
+  vertexColors: true,
+  linewidth: 3,        // screen-space pixels
+  resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+});
+const axisLines = new LineSegments2(axisGeo, axisMat);
+axisLines.computeLineDistances();
 scene.add(axisLines);
+
+// Keep resolution up to date
+window.addEventListener('resize', () => {
+  axisMat.resolution.set(window.innerWidth, window.innerHeight);
+});
+
+// ── 原點白點 ─────────────────────────────────────────────
+const dotGeo = new THREE.SphereGeometry(0.03, 12, 12);
+const dotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const originDot = new THREE.Mesh(dotGeo, dotMat);
+originDot.position.set(0, 0, 0);
+scene.add(originDot);
 
 // ── Corner orientation gizmo ──────────────────────────────
 const gizmoScene = new THREE.Scene();
-const gizmoAxes  = new THREE.AxesHelper(0.8); // 角落 gizmo 保留完整三軸
+const gizmoAxes = new THREE.AxesHelper(0.8);
 gizmoScene.add(gizmoAxes);
 
 const gizmoCamera = new THREE.OrthographicCamera(-1.2, 1.2, 1.2, -1.2, 0.1, 10);
@@ -43,6 +58,7 @@ export function toggleGrid() {
 export function toggleAxes() {
   gizmoState.axes = !gizmoState.axes;
   axisLines.visible = gizmoState.axes;
+  originDot.visible = gizmoState.axes;
 }
 export function toggleCorner() {
   gizmoState.corner = !gizmoState.corner;
@@ -54,7 +70,7 @@ export function renderCornerGizmo(renderer, camera, scale = 1) {
 
   gizmoAxes.quaternion.copy(camera.quaternion).invert();
 
-  const size   = Math.round(100 * scale);
+  const size = Math.round(100 * scale);
   const offset = Math.round(10 * scale);
   const canvas = renderer.domElement;
 

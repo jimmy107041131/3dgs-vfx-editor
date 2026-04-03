@@ -31,5 +31,5 @@ export function registerBreakTransformNode() {
     this.setOutputData(2, tf.scale.clone());
   };
 
-  LiteGraph.registerNodeType('3dgs/CPU/utility/BreakTransform (CPU)', BreakTransformNode);
+  LiteGraph.registerNodeType('CPU/utility/BreakTransform (CPU)', BreakTransformNode);
 }

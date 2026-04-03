@@ -121,8 +121,8 @@ LGraphCanvas.prototype.processNodeSelected = function(node, e) {
 // ── Cross-domain connection handling ─────────────────────
 // Auto-insert bridge for js→dyno, block dyno→js
 const JS_TO_DYNO = {
-  'js_float:dyno_float': '3dgs/bridge/FloatToGPU',
-  'js_vec3:dyno_vec3': '3dgs/bridge/Vec3ToGPU',
+  'js_float:dyno_float': 'Bridge/FloatToGPU',
+  'js_vec3:dyno_vec3': 'Bridge/Vec3ToGPU',
 };
 const DYNO_TYPES = new Set(['dyno_float', 'dyno_vec2', 'dyno_vec3', 'dyno_vec4', 'dyno_int', 'splat_source', 'splat_emitter']);
 const JS_TYPES = new Set(['js_float', 'js_vec3']);
@@ -161,10 +161,12 @@ LiteGraph.LGraphNode.prototype.connect = function (outputSlot, targetNode, targe
 // ── LiteGraph ─────────────────────────────────────────────
 registerNodes();
 
-// Node visibility: show all 3dgs nodes, hide litegraph built-ins
-const FILTER = '3dgs';
+// Node visibility: show our nodes, hide litegraph built-ins
+const FILTER = 'workshop';
+const OUR_PREFIXES = ['3dgs/', 'Transform/', '3D Model/', 'CPU/', 'Bridge/', 'Subgraph/'];
 for (const type in LiteGraph.registered_node_types) {
-  LiteGraph.registered_node_types[type].filter = type.startsWith('3dgs/') ? FILTER : '__hidden__';
+  const ours = OUR_PREFIXES.some(p => type.startsWith(p));
+  LiteGraph.registered_node_types[type].filter = ours ? FILTER : '__hidden__';
 }
 
 const graph = new LGraph();
@@ -288,7 +290,7 @@ export function initGraphManager({ attachGizmo, detachGizmo, getActiveTransformN
   lgCanvas.onNodeSelected = function (node) {
     const activeNode = _getActiveTransformNode();
     if (activeNode) activeNode._selected = false;
-    if (node?.type === '3dgs/Transform' && node._helper) {
+    if (node?.type === 'Transform/Transform' && node._helper) {
       node._selected = true;
       _attachGizmo(node);
     } else {

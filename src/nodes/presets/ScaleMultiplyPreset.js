@@ -4,13 +4,13 @@ import { LiteGraph } from 'litegraph.js';
 // Internal: split both → multiply each axis → reassemble
 function buildScaleMultiplyGraph(graph) {
   // ── Inputs ──
-  const inScales = LiteGraph.createNode('3dgs/subgraph/Input');
+  const inScales = LiteGraph.createNode('Subgraph/Input');
   graph.add(inScales);
   inScales.pos = [50, 200];
   inScales.setProperty('type', 'dyno_vec3');
   inScales.setProperty('name', 'scales');
 
-  const inFactor = LiteGraph.createNode('3dgs/subgraph/Input');
+  const inFactor = LiteGraph.createNode('Subgraph/Input');
   graph.add(inFactor);
   inFactor.pos = [50, 50];
   inFactor.setProperty('type', 'dyno_vec3');
@@ -59,7 +59,7 @@ function buildScaleMultiplyGraph(graph) {
   mulZ.connect(0, make, 2);
 
   // ── Output ──
-  const out = LiteGraph.createNode('3dgs/subgraph/Output');
+  const out = LiteGraph.createNode('Subgraph/Output');
   graph.add(out);
   out.pos = [940, 170];
   out.setProperty('type', 'dyno_vec3');
@@ -68,7 +68,7 @@ function buildScaleMultiplyGraph(graph) {
 }
 
 export function registerScaleMultiplyPreset() {
-  const Base = LiteGraph.registered_node_types['3dgs/Subgraph']
+  const Base = LiteGraph.registered_node_types['Subgraph/Subgraph']
             || LiteGraph.registered_node_types['graph/subgraph'];
   if (!Base) return;
 
@@ -82,8 +82,8 @@ export function registerScaleMultiplyPreset() {
   ScaleMultiplyPreset.prototype.constructor = ScaleMultiplyPreset;
   ScaleMultiplyPreset.title                 = 'Scale Multiply';
   ScaleMultiplyPreset.desc                  = 'Multiply scales per-axis by a factor vec3';
-  ScaleMultiplyPreset.input_node_type       = '3dgs/subgraph/Input';
-  ScaleMultiplyPreset.output_node_type      = '3dgs/subgraph/Output';
+  ScaleMultiplyPreset.input_node_type       = 'Subgraph/Input';
+  ScaleMultiplyPreset.output_node_type      = 'Subgraph/Output';
 
   LiteGraph.registerNodeType('3dgs/presets/ScaleMultiply', ScaleMultiplyPreset);
 }

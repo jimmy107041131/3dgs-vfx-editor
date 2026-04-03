@@ -146,5 +146,5 @@ export function registerTransformNode() {
     this._dirty = true;
   };
 
-  LiteGraph.registerNodeType('3dgs/Transform', TransformNode);
+  LiteGraph.registerNodeType('Transform/Transform', TransformNode);
 }

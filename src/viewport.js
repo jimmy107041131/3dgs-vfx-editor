@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 import { SparkRenderer } from '@sparkjsdev/spark';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { scene } from './scene.js';
 
 // ── Renderer ──────────────────────────────────────────────
@@ -14,6 +18,19 @@ scene.add(spark);
 
 const camera = new THREE.PerspectiveCamera(60, 1, 0.01, 1000);
 camera.position.set(0, 3, 5);
+
+// ── Post-processing ──────────────────────────────────────
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  0.4,   // strength
+  0.5,   // radius
+  0.85   // threshold
+);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
 
 // ── FPS Camera Controls ──────────────────────────────────
 const keys = {};
@@ -123,6 +140,8 @@ document.getElementById('btn-reset-cam').addEventListener('click', resetCamera);
 export {
   renderer,
   camera,
+  composer,
+  bloomPass,
   spark,
   keys,
   applyKeyboardMovement,

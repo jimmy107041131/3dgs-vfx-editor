@@ -34,5 +34,5 @@ export function registerMakeTransformNode() {
     });
   };
 
-  LiteGraph.registerNodeType('3dgs/CPU/utility/MakeTransform (CPU)', MakeTransformNode);
+  LiteGraph.registerNodeType('CPU/utility/MakeTransform (CPU)', MakeTransformNode);
 }

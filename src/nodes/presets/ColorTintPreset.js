@@ -2,13 +2,13 @@ import { LiteGraph } from 'litegraph.js';
 
 function buildColorTintGraph(graph) {
   // ── Inputs ──
-  const inRgba = LiteGraph.createNode('3dgs/subgraph/Input');
+  const inRgba = LiteGraph.createNode('Subgraph/Input');
   graph.add(inRgba);
   inRgba.pos = [50, 200];
   inRgba.setProperty('type', 'dyno_vec4');
   inRgba.setProperty('name', 'rgba');
 
-  const inTint = LiteGraph.createNode('3dgs/subgraph/Input');
+  const inTint = LiteGraph.createNode('Subgraph/Input');
   graph.add(inTint);
   inTint.pos = [50, 50];
   inTint.setProperty('type', 'dyno_vec3');
@@ -58,7 +58,7 @@ function buildColorTintGraph(graph) {
   splitRgba.connect(3, make, 3); // w → w
 
   // ── Output ──
-  const out = LiteGraph.createNode('3dgs/subgraph/Output');
+  const out = LiteGraph.createNode('Subgraph/Output');
   graph.add(out);
   out.pos = [940, 200];
   out.setProperty('type', 'dyno_vec4');
@@ -67,7 +67,7 @@ function buildColorTintGraph(graph) {
 }
 
 export function registerColorTintPreset() {
-  const DynoSubgraph = LiteGraph.registered_node_types['3dgs/Subgraph'];
+  const DynoSubgraph = LiteGraph.registered_node_types['Subgraph/Subgraph'];
   const Base = DynoSubgraph || LiteGraph.registered_node_types['graph/subgraph'];
   if (!Base) return;
 
@@ -82,8 +82,8 @@ export function registerColorTintPreset() {
 
   ColorTintPreset.title            = 'Color Tint';
   ColorTintPreset.desc             = 'Multiply rgba channels by a tint vec3';
-  ColorTintPreset.input_node_type  = '3dgs/subgraph/Input';
-  ColorTintPreset.output_node_type = '3dgs/subgraph/Output';
+  ColorTintPreset.input_node_type  = 'Subgraph/Input';
+  ColorTintPreset.output_node_type = 'Subgraph/Output';
 
   LiteGraph.registerNodeType('3dgs/presets/ColorTint', ColorTintPreset);
 }

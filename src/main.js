@@ -1,6 +1,6 @@
 import { scene } from './scene.js';
 import { renderCornerGizmo } from './gizmos.js';
-import { renderer, camera, spark, keys, applyKeyboardMovement, getRenderScale, setRenderScale, getMouseOver3D, setGizmoDragging } from './viewport.js';
+import { renderer, camera, composer, bloomPass, spark, keys, applyKeyboardMovement, getRenderScale, setRenderScale, getMouseOver3D, setGizmoDragging } from './viewport.js';
 import { initGizmo, attachGizmo, detachGizmo, getActiveTransformNode } from './gizmo-manager.js';
 import { graph, lgCanvas, pushUndo, resizeLG, initGraphManager, startGraph, repairSubgraphLinks } from './graph-manager.js';
 import { initProjectIO } from './project-io.js';
@@ -34,6 +34,8 @@ initUI(renderer, camera, {
   getRenderScale,
   setRenderScale,
   spark,
+  composer,
+  bloomPass,
   resizeLG,
 });
 
@@ -70,7 +72,7 @@ function updateStats(now) {
 renderer.setAnimationLoop((time) => {
   graph.runStep(1);
   applyKeyboardMovement();
-  renderer.render(scene, camera);
+  composer.render();
   renderCornerGizmo(renderer, camera, getRenderScale());
   updateStats(time);
 });

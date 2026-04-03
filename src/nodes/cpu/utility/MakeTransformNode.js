@@ -7,11 +7,11 @@ export function registerMakeTransformNode() {
     this.addInput('rotation', 'js_vec3');
     this.addInput('scale',    'js_vec3');
     this.addOutput('transform', 'transform');
-    this.title = 'MakeTransform';
+    this.title = 'MakeTransform (CPU)';
     this.size = [180, 80];
   }
 
-  MakeTransformNode.title = 'MakeTransform';
+  MakeTransformNode.title = 'MakeTransform (CPU)';
   MakeTransformNode.prototype.color = '#3a2a1a';
   MakeTransformNode.prototype.bgcolor = '#3e2e1e';
 
@@ -34,5 +34,5 @@ export function registerMakeTransformNode() {
     });
   };
 
-  LiteGraph.registerNodeType('3dgs/CPU/utility/MakeTransform', MakeTransformNode);
+  LiteGraph.registerNodeType('3dgs/CPU/utility/MakeTransform (CPU)', MakeTransformNode);
 }

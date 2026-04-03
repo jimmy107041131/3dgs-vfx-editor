@@ -40,6 +40,8 @@ function migrateGraph(save) {
       '3dgs/utility/MakeVec4': '3dgs/GPU/utility/MakeVec4 (GPU)',
       '3dgs/utility/AnimatedFloat': null, // deleted
       '3dgs/Transform': '3dgs/SplatTransform', // v1 Transform was splat transform
+      '3dgs/CPU/utility/BreakTransform': '3dgs/CPU/utility/BreakTransform (CPU)',
+      '3dgs/CPU/utility/MakeTransform': '3dgs/CPU/utility/MakeTransform (CPU)',
     };
     for (const n of graphData.nodes) {
       if (TYPE_MAP[n.type] !== undefined) {

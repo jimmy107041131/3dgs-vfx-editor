@@ -7,11 +7,11 @@ export function registerBreakTransformNode() {
     this.addOutput('position', 'js_vec3');
     this.addOutput('rotation', 'js_vec3');
     this.addOutput('scale',    'js_vec3');
-    this.title = 'BreakTransform';
+    this.title = 'BreakTransform (CPU)';
     this.size = [180, 80];
   }
 
-  BreakTransformNode.title = 'BreakTransform';
+  BreakTransformNode.title = 'BreakTransform (CPU)';
   BreakTransformNode.prototype.color = '#3a2a1a';
   BreakTransformNode.prototype.bgcolor = '#3e2e1e';
 
@@ -31,5 +31,5 @@ export function registerBreakTransformNode() {
     this.setOutputData(2, tf.scale.clone());
   };
 
-  LiteGraph.registerNodeType('3dgs/CPU/utility/BreakTransform', BreakTransformNode);
+  LiteGraph.registerNodeType('3dgs/CPU/utility/BreakTransform (CPU)', BreakTransformNode);
 }

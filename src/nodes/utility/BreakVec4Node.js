@@ -3,7 +3,7 @@ import { dyno } from '@sparkjsdev/spark';
 
 const { Split } = dyno;
 
-export function registerSplitVec4Node() {
+export function registerBreakVec4Node() {
   function SplitVec4Node() {
     this.addInput('vec4', 'dyno_vec4');
     this.addOutput('x',   'dyno_float');

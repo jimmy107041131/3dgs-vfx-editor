@@ -6,7 +6,7 @@ const { DynoFloat } = dyno;
 export function registerFloatConstNode() {
   function FloatConstNode() {
     this.addOutput('value', 'dyno_float');
-    this.title = 'Float';
+    this.title = 'Float (GPU)';
     this.size  = [160, 55];
     this.properties = { value: 0 };
 
@@ -18,10 +18,10 @@ export function registerFloatConstNode() {
     this.addWidget('number', 'value', 0, (v) => {
       this.properties.value = v;
       this._uniform.value = v;
-    }, { step: 0.01 });
+    }, { step: 0.1 });
   }
 
-  FloatConstNode.title = 'Float';
+  FloatConstNode.title = 'Float (GPU)';
 
   FloatConstNode.prototype.onConfigure = function () {
     const v = this.properties.value ?? 0;
@@ -33,5 +33,5 @@ export function registerFloatConstNode() {
     this.setOutputData(0, this._builder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Float', FloatConstNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Float (GPU)', FloatConstNode);
 }

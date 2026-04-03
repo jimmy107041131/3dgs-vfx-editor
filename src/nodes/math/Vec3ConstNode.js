@@ -7,7 +7,7 @@ const { DynoVec3 } = dyno;
 export function registerVec3ConstNode() {
   function Vec3ConstNode() {
     this.addOutput('vec3', 'dyno_vec3');
-    this.title = 'Vec3';
+    this.title = 'Vec3 (GPU)';
     this.size  = [160, 90];
     this.properties = { x: 0, y: 0, z: 0 };
 
@@ -18,12 +18,12 @@ export function registerVec3ConstNode() {
     const update = () => {
       u.value = new THREE.Vector3(this.properties.x, this.properties.y, this.properties.z);
     };
-    this.addWidget('number', 'x', 0, (v) => { this.properties.x = v; update(); }, { step: 0.01 });
-    this.addWidget('number', 'y', 0, (v) => { this.properties.y = v; update(); }, { step: 0.01 });
-    this.addWidget('number', 'z', 0, (v) => { this.properties.z = v; update(); }, { step: 0.01 });
+    this.addWidget('number', 'x', 0, (v) => { this.properties.x = v; update(); }, { step: 0.1 });
+    this.addWidget('number', 'y', 0, (v) => { this.properties.y = v; update(); }, { step: 0.1 });
+    this.addWidget('number', 'z', 0, (v) => { this.properties.z = v; update(); }, { step: 0.1 });
   }
 
-  Vec3ConstNode.title = 'Vec3';
+  Vec3ConstNode.title = 'Vec3 (GPU)';
 
   Vec3ConstNode.prototype.onConfigure = function () {
     const { x = 0, y = 0, z = 0 } = this.properties;
@@ -37,5 +37,5 @@ export function registerVec3ConstNode() {
     this.setOutputData(0, this._builder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Vec3', Vec3ConstNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Vec3 (GPU)', Vec3ConstNode);
 }

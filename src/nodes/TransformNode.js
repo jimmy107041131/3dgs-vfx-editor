@@ -1,24 +1,11 @@
 import { LiteGraph } from 'litegraph.js';
-import { dyno } from '@sparkjsdev/spark';
 import * as THREE from 'three';
-
-const { Gsplat, dynoBlock, splitGsplat, combineGsplat, TransformGsplat,
-        DynoVec3, DynoVec4, DynoFloat, mul } = dyno;
-
-function eulerToQuat(rx, ry, rz) {
-  const e = new THREE.Euler(
-    rx * Math.PI / 180,
-    ry * Math.PI / 180,
-    rz * Math.PI / 180, 'YXZ'
-  );
-  const q = new THREE.Quaternion().setFromEuler(e);
-  return new THREE.Vector4(q.x, q.y, q.z, q.w);
-}
+import { scene } from '../scene.js';
 
 export function registerTransformNode() {
   function TransformNode() {
-    this.addInput('emitter',  'splat_emitter');
-    this.addOutput('emitter', 'splat_emitter');
+    this.addInput('parent', 'transform');
+    this.addOutput('transform', 'transform');
     this.title = 'Transform';
     this.size = [200, 290];
     this.properties = {
@@ -27,99 +14,136 @@ export function registerTransformNode() {
       sx: 1, sy: 1, sz: 1,
     };
 
-    this._translateU = new DynoVec3({ value: new THREE.Vector3(0, 0, 0) });
-    this._rotateU    = new DynoVec4({ value: new THREE.Vector4(0, 0, 0, 1) });
-    this._scaleU     = new DynoVec3({ value: new THREE.Vector3(1, 1, 1) });
+    // 3D helper (axes in viewport, only visible when selected)
+    this._helper = new THREE.AxesHelper(0.5);
+    this._helper.visible = false;
+    this._helper.userData.transformNode = this;
+    this._selected = false;
+    scene.add(this._helper);
 
-    this._lastInput   = null;
-    this._lastEmitter = null;
+    // Local transform state
+    this._position   = new THREE.Vector3();
+    this._quaternion  = new THREE.Quaternion();
+    this._scale       = new THREE.Vector3(1, 1, 1);
+    this._worldOutput = null;
 
     const self = this;
-    const updateT = () => {
-      self._translateU.value = new THREE.Vector3(self.properties.px, self.properties.py, self.properties.pz);
-      self._lastInput = null;
-    };
-    const updateR = () => {
-      self._rotateU.value = eulerToQuat(self.properties.rx, self.properties.ry, self.properties.rz);
-      self._lastInput = null;
-    };
-    const updateS = () => {
-      self._scaleU.value = new THREE.Vector3(self.properties.sx, self.properties.sy, self.properties.sz);
-      self._lastInput = null;
-    };
+    const update = () => { self._dirty = true; };
+    this._dirty = true;
 
     // Position
-    this.addWidget('number', 'pos X', 0, (v) => { self.properties.px = v; updateT(); }, { step: 0.1 });
-    this.addWidget('number', 'pos Y', 0, (v) => { self.properties.py = v; updateT(); }, { step: 0.1 });
-    this.addWidget('number', 'pos Z', 0, (v) => { self.properties.pz = v; updateT(); }, { step: 0.1 });
+    this.addWidget('number', 'pos X', 0, (v) => { self.properties.px = v; update(); }, { step: 0.1 });
+    this.addWidget('number', 'pos Y', 0, (v) => { self.properties.py = v; update(); }, { step: 0.1 });
+    this.addWidget('number', 'pos Z', 0, (v) => { self.properties.pz = v; update(); }, { step: 0.1 });
     // Rotation (euler degrees)
-    this.addWidget('number', 'rot X', 0, (v) => { self.properties.rx = v; updateR(); }, { step: 1 });
-    this.addWidget('number', 'rot Y', 0, (v) => { self.properties.ry = v; updateR(); }, { step: 1 });
-    this.addWidget('number', 'rot Z', 0, (v) => { self.properties.rz = v; updateR(); }, { step: 1 });
+    this.addWidget('number', 'rot X', 0, (v) => { self.properties.rx = v; update(); }, { step: 1 });
+    this.addWidget('number', 'rot Y', 0, (v) => { self.properties.ry = v; update(); }, { step: 1 });
+    this.addWidget('number', 'rot Z', 0, (v) => { self.properties.rz = v; update(); }, { step: 1 });
     // Scale (per-axis)
-    this.addWidget('number', 'scale X', 1, (v) => { self.properties.sx = v; updateS(); }, { step: 0.01, min: 0.001 });
-    this.addWidget('number', 'scale Y', 1, (v) => { self.properties.sy = v; updateS(); }, { step: 0.01, min: 0.001 });
-    this.addWidget('number', 'scale Z', 1, (v) => { self.properties.sz = v; updateS(); }, { step: 0.01, min: 0.001 });
+    this.addWidget('number', 'scale X', 1, (v) => { self.properties.sx = v; update(); }, { step: 0.1, min: 0.01 });
+    this.addWidget('number', 'scale Y', 1, (v) => { self.properties.sy = v; update(); }, { step: 0.1, min: 0.01 });
+    this.addWidget('number', 'scale Z', 1, (v) => { self.properties.sz = v; update(); }, { step: 0.1, min: 0.01 });
   }
 
   TransformNode.title = 'Transform';
+  TransformNode.prototype.color = '#3a2a1a';
+  TransformNode.prototype.bgcolor = '#3e2e1e';
+
   TransformNode.prototype.onConfigure = function () {
     const p = this.properties;
-    this._translateU.value = new THREE.Vector3(p.px ?? 0, p.py ?? 0, p.pz ?? 0);
-    this._rotateU.value = eulerToQuat(p.rx ?? 0, p.ry ?? 0, p.rz ?? 0);
-    this._scaleU.value = new THREE.Vector3(p.sx ?? 1, p.sy ?? 1, p.sz ?? 1);
     const vals = [p.px, p.py, p.pz, p.rx, p.ry, p.rz, p.sx, p.sy, p.sz];
     vals.forEach((v, i) => { if (this.widgets?.[i]) this.widgets[i].value = v ?? (i >= 6 ? 1 : 0); });
-    this._lastInput = null;
+    this._dirty = true;
   };
 
-  TransformNode.prototype.color = '#1a2a3a';
-  TransformNode.prototype.bgcolor = '#1e2e3e';
-
   TransformNode.prototype.onExecute = function () {
-    const emitter = this.getInputData(0);
-    if (!emitter?.packedSplats) return;
+    // Skip recomputation if nothing changed (no parent = static)
+    const parent = this.getInputData(0);
+    if (!this._dirty && !parent && this._worldOutput) {
+      this._helper.visible = this._selected;
+      this.setOutputData(0, this._worldOutput);
+      return;
+    }
+    this._dirty = false;
 
-    const changed = emitter !== this._lastInput;
+    const p = this.properties;
+    this._position.set(p.px, p.py, p.pz);
+    this._quaternion.setFromEuler(new THREE.Euler(
+      p.rx * Math.PI / 180,
+      p.ry * Math.PI / 180,
+      p.rz * Math.PI / 180,
+      'YXZ'
+    ));
+    this._scale.set(p.sx, p.sy, p.sz);
 
-    if (changed || !this._lastEmitter) {
-      this._lastInput = emitter;
-
-      const upstreamBuildFn = emitter.buildFn;
-      const translateU = this._translateU;
-      const rotateU    = this._rotateU;
-      const scaleU     = this._scaleU;
-
-      const buildFn = (gsplat) => {
-        let modified = upstreamBuildFn ? upstreamBuildFn(gsplat) : gsplat;
-
-        // Per-axis scale: multiply center and scales by vec3
-        const outputs = splitGsplat(modified).outputs;
-        modified = combineGsplat({
-          gsplat: modified,
-          center: mul(outputs.center, scaleU.dynoOut()),
-          scales: mul(outputs.scales, scaleU.dynoOut()),
-        });
-
-        // Then apply rotate + translate (scale=1 since already applied)
-        return new TransformGsplat({
-          gsplat:    modified,
-          scale:     new DynoFloat({ value: 1 }).dynoOut(),
-          rotate:    rotateU.dynoOut(),
-          translate: translateU.dynoOut(),
-        }).dynoOut();
-      };
-
-      const modifier = dynoBlock(
-        { gsplat: Gsplat },
-        { gsplat: Gsplat },
-        ({ gsplat }) => ({ gsplat: buildFn(gsplat) })
-      );
-
-      this._lastEmitter = { packedSplats: emitter.packedSplats, modifier, buildFn };
+    let worldPos, worldQuat, worldScale;
+    if (parent) {
+      worldScale = parent.scale.clone().multiply(this._scale);
+      worldQuat  = parent.quaternion.clone().multiply(this._quaternion);
+      worldPos   = this._position.clone().multiply(parent.scale);
+      worldPos.applyQuaternion(parent.quaternion);
+      worldPos.add(parent.position);
+    } else {
+      worldPos   = this._position.clone();
+      worldQuat  = this._quaternion.clone();
+      worldScale = this._scale.clone();
     }
 
-    this.setOutputData(0, this._lastEmitter);
+    this._worldOutput = {
+      position:   worldPos,
+      quaternion: worldQuat,
+      scale:      worldScale,
+    };
+
+    this._helper.position.copy(worldPos);
+    this._helper.quaternion.copy(worldQuat);
+    this._helper.scale.copy(worldScale);
+    this._helper.visible = this._selected;
+
+    this.setOutputData(0, this._worldOutput);
+  };
+
+  TransformNode.prototype.onRemoved = function () {
+    if (this._helper) {
+      scene.remove(this._helper);
+      this._helper.dispose();
+      this._helper = null;
+    }
+  };
+
+  // Called from gizmo system to write back values (world → local conversion)
+  TransformNode.prototype.setFromGizmo = function (worldPos, worldQuat, worldScale) {
+    const parent = this.getInputData(0);
+    let localPos, localQuat, localScale;
+
+    if (parent) {
+      // Invert parent transform to get local space
+      const parentQuatInv = parent.quaternion.clone().invert();
+      const parentScaleInv = new THREE.Vector3(1 / parent.scale.x, 1 / parent.scale.y, 1 / parent.scale.z);
+
+      localPos = worldPos.clone().sub(parent.position).applyQuaternion(parentQuatInv).multiply(parentScaleInv);
+      localQuat = parentQuatInv.clone().multiply(worldQuat);
+      localScale = worldScale.clone().multiply(parentScaleInv);
+    } else {
+      localPos = worldPos;
+      localQuat = worldQuat;
+      localScale = worldScale;
+    }
+
+    const p = this.properties;
+    p.px = localPos.x; p.py = localPos.y; p.pz = localPos.z;
+
+    const euler = new THREE.Euler().setFromQuaternion(localQuat, 'YXZ');
+    p.rx = euler.x * 180 / Math.PI;
+    p.ry = euler.y * 180 / Math.PI;
+    p.rz = euler.z * 180 / Math.PI;
+
+    p.sx = localScale.x; p.sy = localScale.y; p.sz = localScale.z;
+
+    // Sync widgets
+    const vals = [p.px, p.py, p.pz, p.rx, p.ry, p.rz, p.sx, p.sy, p.sz];
+    vals.forEach((v, i) => { if (this.widgets?.[i]) this.widgets[i].value = v; });
+    this._dirty = true;
   };
 
   LiteGraph.registerNodeType('3dgs/Transform', TransformNode);

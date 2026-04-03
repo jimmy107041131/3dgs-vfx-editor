@@ -1,6 +1,10 @@
 import { LiteGraph } from 'litegraph.js';
 
-const DYNO_TYPES = ['dyno_float', 'dyno_vec2', 'dyno_vec3', 'dyno_vec4', 'dyno_int', 'splat_source'];
+const DYNO_TYPES = [
+  'dyno_float', 'dyno_vec2', 'dyno_vec3', 'dyno_vec4', 'dyno_int',
+  'splat_source', 'splat_emitter',
+  'js_float', 'js_vec3', 'transform',
+];
 
 // ── Subgraph Input ──────────────────────────────────────────────────────────
 // Placed inside a subgraph to expose an external input port.

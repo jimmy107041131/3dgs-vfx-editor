@@ -70,6 +70,11 @@ export function registerSplatSourceNode() {
   };
 
   SplatSourceNode.prototype._load = function (file) {
+    // Clean up previous
+    if (this._splatMesh?.dispose) this._splatMesh.dispose();
+    this._splatMesh = null;
+    if (this._blobUrl) { URL.revokeObjectURL(this._blobUrl); this._blobUrl = null; }
+
     this._fileName = file.name;
     this.properties.fileName = file.name;
     this._status = 'loading';
@@ -78,6 +83,7 @@ export function registerSplatSourceNode() {
     this.color = '#3a2a10';
 
     const url = URL.createObjectURL(file);
+    this._blobUrl = url;
     this._splatMesh = new SplatMesh({ url, fileName: file.name });
     this._splatMesh.packedSplats.initialized.then(() => {
       this._ready = true;
@@ -112,6 +118,12 @@ export function registerSplatSourceNode() {
   };
 
 
+
+  SplatSourceNode.prototype.onRemoved = function () {
+    if (this._splatMesh?.dispose) this._splatMesh.dispose();
+    this._splatMesh = null;
+    if (this._blobUrl) { URL.revokeObjectURL(this._blobUrl); this._blobUrl = null; }
+  };
 
   LiteGraph.registerNodeType('3dgs/SplatSource', SplatSourceNode);
 }

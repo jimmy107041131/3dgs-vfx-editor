@@ -10,13 +10,13 @@ export function registerStepNode() {
     this.addInput('edge', 'dyno_float');
     this.addInput('x',    'dyno_float');
     this.addOutput('result', 'dyno_float');
-    this.title = 'Step';
+    this.title = 'Step (GPU)';
     this.size  = [130, 60];
     this._lastEdge = null; this._lastX = null;
     this._cachedBuilder = null;
   }
 
-  StepNode.title = 'Step';
+  StepNode.title = 'Step (GPU)';
 
   StepNode.prototype.onExecute = function () {
     const edgeB = this.getInputData(0);
@@ -35,5 +35,5 @@ export function registerStepNode() {
     this.setOutputData(0, this._cachedBuilder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Step', StepNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Step (GPU)', StepNode);
 }

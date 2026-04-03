@@ -9,13 +9,13 @@ export function registerMakeVec2Node() {
     this.addInput('x', 'dyno_float');
     this.addInput('y', 'dyno_float');
     this.addOutput('vec2', 'dyno_vec2');
-    this.title = 'Make Vec2';
+    this.title = 'MakeVec2 (GPU)';
     this.size  = [140, 60];
     this._lastX = undefined; this._lastY = undefined;
     this._cachedBuilder = null;
   }
 
-  MakeVec2Node.title = 'Make Vec2';
+  MakeVec2Node.title = 'MakeVec2 (GPU)';
 
   MakeVec2Node.prototype.onExecute = function () {
     const xB = this.getInputData(0);
@@ -33,5 +33,5 @@ export function registerMakeVec2Node() {
     this.setOutputData(0, this._cachedBuilder);
   };
 
-  LiteGraph.registerNodeType('3dgs/utility/MakeVec2', MakeVec2Node);
+  LiteGraph.registerNodeType('3dgs/GPU/utility/MakeVec2 (GPU)', MakeVec2Node);
 }

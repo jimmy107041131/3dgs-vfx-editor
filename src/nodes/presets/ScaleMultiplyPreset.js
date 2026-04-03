@@ -17,33 +17,33 @@ function buildScaleMultiplyGraph(graph) {
   inFactor.setProperty('name', 'factor');
 
   // ── Split scales ──
-  const splitS = LiteGraph.createNode('3dgs/utility/SplitVec3');
+  const splitS = LiteGraph.createNode('3dgs/GPU/utility/BreakVec3 (GPU)');
   splitS.pos = [300, 200];
   graph.add(splitS);
   inScales.connect(0, splitS, 0);
 
   // ── Split factor ──
-  const splitF = LiteGraph.createNode('3dgs/utility/SplitVec3');
+  const splitF = LiteGraph.createNode('3dgs/GPU/utility/BreakVec3 (GPU)');
   splitF.pos = [300, 50];
   graph.add(splitF);
   inFactor.connect(0, splitF, 0);
 
   // ── Multiply each axis ──
-  const mulX = LiteGraph.createNode('3dgs/math/Math');
+  const mulX = LiteGraph.createNode('3dgs/GPU/math/Math (GPU)');
   graph.add(mulX);
   mulX.pos = [520, 50];
   mulX.properties.op = '×'; mulX.widgets[0].value = '×';
   splitS.connect(0, mulX, 0);
   splitF.connect(0, mulX, 1);
 
-  const mulY = LiteGraph.createNode('3dgs/math/Math');
+  const mulY = LiteGraph.createNode('3dgs/GPU/math/Math (GPU)');
   graph.add(mulY);
   mulY.pos = [520, 200];
   mulY.properties.op = '×'; mulY.widgets[0].value = '×';
   splitS.connect(1, mulY, 0);
   splitF.connect(1, mulY, 1);
 
-  const mulZ = LiteGraph.createNode('3dgs/math/Math');
+  const mulZ = LiteGraph.createNode('3dgs/GPU/math/Math (GPU)');
   graph.add(mulZ);
   mulZ.pos = [520, 350];
   mulZ.properties.op = '×'; mulZ.widgets[0].value = '×';
@@ -51,7 +51,7 @@ function buildScaleMultiplyGraph(graph) {
   splitF.connect(2, mulZ, 1);
 
   // ── Reassemble ──
-  const make = LiteGraph.createNode('3dgs/utility/MakeVec3');
+  const make = LiteGraph.createNode('3dgs/GPU/utility/MakeVec3 (GPU)');
   make.pos = [740, 170];
   graph.add(make);
   mulX.connect(0, make, 0);

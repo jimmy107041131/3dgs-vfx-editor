@@ -24,24 +24,24 @@ function buildParticleMaskGraph(g) {
   const inDensity = addSubIn(g, 50, 250, 'dyno_float', 'density');
 
   // HashFloat: index → random [0,1]
-  const hash = LiteGraph.createNode('3dgs/math/HashFloat');
+  const hash = LiteGraph.createNode('3dgs/GPU/math/HashFloat (GPU)');
   g.add(hash); hash.pos = [300, 100];
   inIndex.connect(0, hash, 0);
 
   // 1 - density (invert so density=1 means all selected)
-  const one = LiteGraph.createNode('3dgs/math/Float');
+  const one = LiteGraph.createNode('3dgs/GPU/math/Float (GPU)');
   g.add(one); one.pos = [300, 300];
   one.properties.value = 1; one._uniform.value = 1; one.widgets[0].value = 1;
   one.title = '1';
 
-  const sub = LiteGraph.createNode('3dgs/math/Math');
+  const sub = LiteGraph.createNode('3dgs/GPU/math/Math (GPU)');
   g.add(sub); sub.pos = [500, 250];
   sub.properties.op = '-'; sub.widgets[0].value = '-';
   one.connect(0, sub, 0);         // 1
   inDensity.connect(0, sub, 1);   // - density
 
   // Step: hash >= (1-density) → 1, else → 0
-  const step = LiteGraph.createNode('3dgs/math/Step');
+  const step = LiteGraph.createNode('3dgs/GPU/math/Step (GPU)');
   g.add(step); step.pos = [700, 150];
   sub.connect(0, step, 0);    // edge = 1-density
   hash.connect(0, step, 1);   // x = hash

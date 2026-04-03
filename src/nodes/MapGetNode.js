@@ -43,7 +43,7 @@ export function registerMapGetNode() {
       self.properties.unitScale = v;
       self._unitScale.value = v;
       self._lastKey = null; // force rebuild
-    }, { step: 0.01, min: 0.001 });
+    }, { step: 0.1, min: 0.01 });
   }
 
   MapGetNode.title = 'Map Get';

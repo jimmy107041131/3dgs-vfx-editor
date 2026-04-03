@@ -2,20 +2,20 @@ import { LiteGraph } from 'litegraph.js';
 
 // Helpers
 function addFloat(g, x, y, val, title) {
-  const n = LiteGraph.createNode('3dgs/math/Float');
+  const n = LiteGraph.createNode('3dgs/GPU/math/Float (GPU)');
   g.add(n); n.pos = [x, y];
   n.properties.value = val; n._uniform.value = val; n.widgets[0].value = val;
   if (title) n.title = title;
   return n;
 }
 function addMath(g, x, y, op) {
-  const n = LiteGraph.createNode('3dgs/math/Math');
+  const n = LiteGraph.createNode('3dgs/GPU/math/Math (GPU)');
   g.add(n); n.pos = [x, y];
   n.properties.op = op; n.widgets[0].value = op;
   return n;
 }
 function addSin(g, x, y) {
-  const n = LiteGraph.createNode('3dgs/math/Sin');
+  const n = LiteGraph.createNode('3dgs/GPU/math/Sin (GPU)');
   g.add(n); n.pos = [x, y];
   return n;
 }
@@ -59,7 +59,7 @@ function buildWaveNoiseGraph(g) {
   const c0_4   = addFloat(g, C*5, 770, 0.4,   '0.4');
 
   // ── Split center → x, z (XZ ground plane) ──
-  const splitC = LiteGraph.createNode('3dgs/utility/SplitVec3');
+  const splitC = LiteGraph.createNode('3dgs/GPU/utility/BreakVec3 (GPU)');
   g.add(splitC); splitC.pos = [C*1, 200];
   inCenter.connect(0, splitC, 0);
 
@@ -204,14 +204,14 @@ function buildWaveNoiseGraph(g) {
   pHeight.connect(0, mulOZ, 1);
 
   // ── MakeVec3(offsetX, height, offsetZ) — Y is main wave height ──
-  const makeOff = LiteGraph.createNode('3dgs/utility/MakeVec3');
+  const makeOff = LiteGraph.createNode('3dgs/GPU/utility/MakeVec3 (GPU)');
   g.add(makeOff); makeOff.pos = [C*11, 490];
   mulOX2.connect(0, makeOff, 0);   // x (secondary, XZStrength)
   mulOZ.connect(0, makeOff, 1);    // y = main wave height (was noiseZ)
   mulOY2.connect(0, makeOff, 2);   // z (secondary, XZStrength)
 
   // ── pos = initPos + targetOffset ──
-  const addPos = LiteGraph.createNode('3dgs/math/Vec3Math');
+  const addPos = LiteGraph.createNode('3dgs/GPU/math/Vec3Math (GPU)');
   g.add(addPos); addPos.pos = [C*12, 350];
   // default op is 'vec3 × float', change to 'vec3 + vec3'
   addPos.properties.op = 'vec3 + vec3';

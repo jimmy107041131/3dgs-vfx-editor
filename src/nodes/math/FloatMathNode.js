@@ -23,7 +23,7 @@ export function registerFloatMathNode() {
     this.addInput('a',  'dyno_float');
     this.addInput('b',  'dyno_float');
     this.addOutput('result', 'dyno_float');
-    this.title = 'Math';
+    this.title = 'Math (GPU)';
     this.size  = [150, 80];
     this.properties = { op: '+' };
     this._lastA  = null; this._lastB = null; this._lastOp = null;
@@ -34,7 +34,7 @@ export function registerFloatMathNode() {
     }, { values: ['+', '-', '×', '÷', 'pow', 'min', 'max', 'mod'] });
   }
 
-  FloatMathNode.title = 'Math';
+  FloatMathNode.title = 'Math (GPU)';
 
   FloatMathNode.prototype.onConfigure = function () {
     if (this.widgets?.[0]) this.widgets[0].value = this.properties.op ?? '+';
@@ -58,5 +58,5 @@ export function registerFloatMathNode() {
     this.setOutputData(0, this._cachedBuilder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Math', FloatMathNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Math (GPU)', FloatMathNode);
 }

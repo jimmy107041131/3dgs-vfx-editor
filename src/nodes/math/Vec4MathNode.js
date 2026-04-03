@@ -27,7 +27,7 @@ export function registerVec4MathNode() {
     this.addInput('a', 'dyno_vec4');
     this.addInput('b', 'dyno_float');
     this.addOutput('result', 'dyno_vec4');
-    this.title = 'Vec4 Math';
+    this.title = 'Vec4Math (GPU)';
     this.size  = [180, 80];
     this.properties = { op: 'vec4 × float' };
     this._lastA = null; this._lastB = null; this._lastOp = null;
@@ -40,7 +40,7 @@ export function registerVec4MathNode() {
     }, { values: OP_LIST });
   }
 
-  Vec4MathNode.title = 'Vec4 Math';
+  Vec4MathNode.title = 'Vec4Math (GPU)';
 
   Vec4MathNode.prototype.onExecute = function () {
     const aB = this.getInputData(0);
@@ -66,5 +66,5 @@ export function registerVec4MathNode() {
     this._lastOp = null;
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Vec4Math', Vec4MathNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Vec4Math (GPU)', Vec4MathNode);
 }

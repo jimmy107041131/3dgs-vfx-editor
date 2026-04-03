@@ -18,13 +18,13 @@ function makeFloatFuncNode({ name, fn }) {
   function Node() {
     this.addInput('x',      'dyno_float');
     this.addOutput('result', 'dyno_float');
-    this.title = name;
+    this.title = name + ' (GPU)';
     this.size  = [120, 40];
     this._lastInput = null;
     this._cachedBuilder = null;
   }
 
-  Node.title = name;
+  Node.title = name + ' (GPU)';
 
   Node.prototype.onExecute = function () {
     const xB = this.getInputData(0);
@@ -35,7 +35,7 @@ function makeFloatFuncNode({ name, fn }) {
     this.setOutputData(0, this._cachedBuilder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/' + name, Node);
+  LiteGraph.registerNodeType('3dgs/GPU/math/' + name + ' (GPU)', Node);
 }
 
 export function registerFloatFuncNode() {

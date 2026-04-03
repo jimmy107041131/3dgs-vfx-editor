@@ -27,7 +27,7 @@ export function registerVec3MathNode() {
     this.addInput('a', 'dyno_vec3');
     this.addInput('b', 'dyno_float');
     this.addOutput('result', 'dyno_vec3');
-    this.title = 'Vec3 Math';
+    this.title = 'Vec3Math (GPU)';
     this.size  = [180, 80];
     this.properties = { op: 'vec3 × float' };
     this._lastA = null; this._lastB = null; this._lastOp = null;
@@ -41,7 +41,7 @@ export function registerVec3MathNode() {
     }, { values: OP_LIST });
   }
 
-  Vec3MathNode.title = 'Vec3 Math';
+  Vec3MathNode.title = 'Vec3Math (GPU)';
 
   Vec3MathNode.prototype.onExecute = function () {
     const aB = this.getInputData(0);
@@ -70,5 +70,5 @@ export function registerVec3MathNode() {
     this._lastOp = null;
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Vec3Math', Vec3MathNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Vec3Math (GPU)', Vec3MathNode);
 }

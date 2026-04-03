@@ -15,12 +15,7 @@ export function registerRendererNode() {
 
     this.addWidget('toggle', 'Enabled', true, (v) => {
       this.properties.enabled = v;
-      if (!v && this._splatMesh) {
-        scene.remove(this._splatMesh);
-        this._splatMesh = null;
-        this._lastPacked = null;
-        this._lastModifier = null;
-      }
+      if (!v) this._clearMesh();
     });
   }
 
@@ -32,17 +27,30 @@ export function registerRendererNode() {
   RendererNode.prototype.color   = '#1a3a1a';
   RendererNode.prototype.bgcolor = '#1e3e1e';
 
+  RendererNode.prototype._clearMesh = function () {
+    if (this._splatMesh) {
+      scene.remove(this._splatMesh);
+      if (this._splatMesh.dispose) this._splatMesh.dispose();
+      this._splatMesh = null;
+      this._lastPacked = null;
+      this._lastModifier = null;
+    }
+  };
+
   RendererNode.prototype.onExecute = function () {
     if (!this.properties.enabled) return;
 
     const emitter = this.getInputData(0);
-    if (!emitter?.packedSplats) return;
+    if (!emitter?.packedSplats) {
+      this._clearMesh(); // clean up on disconnect
+      return;
+    }
 
     const { packedSplats, modifier } = emitter;
     const changed = packedSplats !== this._lastPacked || modifier !== this._lastModifier;
 
     if (changed || !this._splatMesh) {
-      if (this._splatMesh) scene.remove(this._splatMesh);
+      this._clearMesh();
 
       this._splatMesh = modifier
         ? new SplatMesh({ packedSplats, objectModifier: modifier })
@@ -55,12 +63,8 @@ export function registerRendererNode() {
   };
 
   RendererNode.prototype.onRemoved = function () {
-    if (this._splatMesh) {
-      scene.remove(this._splatMesh);
-      this._splatMesh = null;
-    }
+    this._clearMesh();
   };
-
 
   LiteGraph.registerNodeType('3dgs/Renderer', RendererNode);
 }

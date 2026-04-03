@@ -7,7 +7,7 @@ const { DynoVec2 } = dyno;
 export function registerVec2ConstNode() {
   function Vec2ConstNode() {
     this.addOutput('vec2', 'dyno_vec2');
-    this.title = 'Vec2';
+    this.title = 'Vec2 (GPU)';
     this.size  = [160, 70];
     this.properties = { x: 0, y: 0 };
 
@@ -18,11 +18,11 @@ export function registerVec2ConstNode() {
     const update = () => {
       u.value = new THREE.Vector2(this.properties.x, this.properties.y);
     };
-    this.addWidget('number', 'x', 0, (v) => { this.properties.x = v; update(); }, { step: 0.01 });
-    this.addWidget('number', 'y', 0, (v) => { this.properties.y = v; update(); }, { step: 0.01 });
+    this.addWidget('number', 'x', 0, (v) => { this.properties.x = v; update(); }, { step: 0.1 });
+    this.addWidget('number', 'y', 0, (v) => { this.properties.y = v; update(); }, { step: 0.1 });
   }
 
-  Vec2ConstNode.title = 'Vec2';
+  Vec2ConstNode.title = 'Vec2 (GPU)';
 
   Vec2ConstNode.prototype.onConfigure = function () {
     const { x = 0, y = 0 } = this.properties;
@@ -35,5 +35,5 @@ export function registerVec2ConstNode() {
     this.setOutputData(0, this._builder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Vec2', Vec2ConstNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Vec2 (GPU)', Vec2ConstNode);
 }

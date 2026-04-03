@@ -10,13 +10,13 @@ export function registerSplitVec4Node() {
     this.addOutput('y',   'dyno_float');
     this.addOutput('z',   'dyno_float');
     this.addOutput('w',   'dyno_float');
-    this.title = 'Split Vec4';
+    this.title = 'BreakVec4 (GPU)';
     this.size  = [140, 100];
     this._lastInput = null;
     this._xB = null; this._yB = null; this._zB = null; this._wB = null;
   }
 
-  SplitVec4Node.title = 'Split Vec4';
+  SplitVec4Node.title = 'BreakVec4 (GPU)';
 
   SplitVec4Node.prototype.onExecute = function () {
     const inputB = this.getInputData(0);
@@ -34,5 +34,5 @@ export function registerSplitVec4Node() {
     this.setOutputData(3, this._wB);
   };
 
-  LiteGraph.registerNodeType('3dgs/utility/SplitVec4', SplitVec4Node);
+  LiteGraph.registerNodeType('3dgs/GPU/utility/BreakVec4 (GPU)', SplitVec4Node);
 }

@@ -7,7 +7,7 @@ const { DynoVec4 } = dyno;
 export function registerVec4ConstNode() {
   function Vec4ConstNode() {
     this.addOutput('vec4', 'dyno_vec4');
-    this.title = 'Vec4';
+    this.title = 'Vec4 (GPU)';
     this.size  = [160, 110];
     this.properties = { x: 0, y: 0, z: 0, w: 1 };
 
@@ -18,13 +18,13 @@ export function registerVec4ConstNode() {
     const update = () => {
       u.value = new THREE.Vector4(this.properties.x, this.properties.y, this.properties.z, this.properties.w);
     };
-    this.addWidget('number', 'x', 0, (v) => { this.properties.x = v; update(); }, { step: 0.01 });
-    this.addWidget('number', 'y', 0, (v) => { this.properties.y = v; update(); }, { step: 0.01 });
-    this.addWidget('number', 'z', 0, (v) => { this.properties.z = v; update(); }, { step: 0.01 });
-    this.addWidget('number', 'w', 1, (v) => { this.properties.w = v; update(); }, { step: 0.01 });
+    this.addWidget('number', 'x', 0, (v) => { this.properties.x = v; update(); }, { step: 0.1 });
+    this.addWidget('number', 'y', 0, (v) => { this.properties.y = v; update(); }, { step: 0.1 });
+    this.addWidget('number', 'z', 0, (v) => { this.properties.z = v; update(); }, { step: 0.1 });
+    this.addWidget('number', 'w', 1, (v) => { this.properties.w = v; update(); }, { step: 0.1 });
   }
 
-  Vec4ConstNode.title = 'Vec4';
+  Vec4ConstNode.title = 'Vec4 (GPU)';
 
   Vec4ConstNode.prototype.onConfigure = function () {
     const { x = 0, y = 0, z = 0, w = 1 } = this.properties;
@@ -39,5 +39,5 @@ export function registerVec4ConstNode() {
     this.setOutputData(0, this._builder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Vec4', Vec4ConstNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Vec4 (GPU)', Vec4ConstNode);
 }

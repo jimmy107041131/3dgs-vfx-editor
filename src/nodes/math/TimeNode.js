@@ -6,7 +6,7 @@ const { DynoFloat } = dyno;
 export function registerTimeNode() {
   function TimeNode() {
     this.addOutput('time', 'dyno_float');
-    this.title = 'Time';
+    this.title = 'Time (GPU)';
     this.size  = [130, 40];
 
     this._uniform = new DynoFloat({ value: 0 });
@@ -16,12 +16,12 @@ export function registerTimeNode() {
     this._builder = (_o) => u.dynoOut();
   }
 
-  TimeNode.title = 'Time';
+  TimeNode.title = 'Time (GPU)';
 
   TimeNode.prototype.onExecute = function () {
     this._uniform.value = (performance.now() - this._startTime) / 1000;
     this.setOutputData(0, this._builder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Time', TimeNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Time (GPU)', TimeNode);
 }

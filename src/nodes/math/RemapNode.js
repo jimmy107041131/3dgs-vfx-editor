@@ -9,7 +9,7 @@ export function registerRemapNode() {
   function RemapNode() {
     this.addInput('x',      'dyno_float');
     this.addOutput('result','dyno_float');
-    this.title = 'Remap';
+    this.title = 'Remap (GPU)';
     this.size  = [175, 130];
     this.properties = { inMin: 0, inMax: 1, outMin: 0, outMax: 1 };
 
@@ -22,13 +22,13 @@ export function registerRemapNode() {
 
     const self = this;
     const mk = (key, uKey) => (v) => { self.properties[key] = v; self[uKey].value = v; };
-    this.addWidget('number', 'inMin',  0, mk('inMin',  '_uInMin'),  { step: 0.01 });
-    this.addWidget('number', 'inMax',  1, mk('inMax',  '_uInMax'),  { step: 0.01 });
-    this.addWidget('number', 'outMin', 0, mk('outMin', '_uOutMin'), { step: 0.01 });
-    this.addWidget('number', 'outMax', 1, mk('outMax', '_uOutMax'), { step: 0.01 });
+    this.addWidget('number', 'inMin',  0, mk('inMin',  '_uInMin'),  { step: 0.1 });
+    this.addWidget('number', 'inMax',  1, mk('inMax',  '_uInMax'),  { step: 0.1 });
+    this.addWidget('number', 'outMin', 0, mk('outMin', '_uOutMin'), { step: 0.1 });
+    this.addWidget('number', 'outMax', 1, mk('outMax', '_uOutMax'), { step: 0.1 });
   }
 
-  RemapNode.title = 'Remap';
+  RemapNode.title = 'Remap (GPU)';
 
   RemapNode.prototype.onConfigure = function () {
     const p = this.properties;
@@ -72,5 +72,5 @@ export function registerRemapNode() {
     this.setOutputData(0, this._cachedBuilder);
   };
 
-  LiteGraph.registerNodeType('3dgs/math/Remap', RemapNode);
+  LiteGraph.registerNodeType('3dgs/GPU/math/Remap (GPU)', RemapNode);
 }

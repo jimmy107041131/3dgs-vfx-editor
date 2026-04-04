@@ -3,10 +3,12 @@ import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { scene } from './scene.js';
+import { NO_BLOOM_LAYER } from './layers.js';
 
 // ── Grid（XZ 平面，Y 為高度軸）────────────────────────────
 const gridHelper = new THREE.GridHelper(100, 100, 0x555555, 0x333333);
 scene.add(gridHelper);
+gridHelper.layers.set(NO_BLOOM_LAYER);
 
 // ── XZ 軸線（粗線，Line2）───────────────────────────────
 const axisGeo = new LineSegmentsGeometry();
@@ -26,6 +28,7 @@ const axisMat = new LineMaterial({
 const axisLines = new LineSegments2(axisGeo, axisMat);
 axisLines.computeLineDistances();
 scene.add(axisLines);
+axisLines.layers.set(NO_BLOOM_LAYER);
 
 // Keep resolution up to date
 window.addEventListener('resize', () => {
@@ -38,6 +41,7 @@ const dotMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 const originDot = new THREE.Mesh(dotGeo, dotMat);
 originDot.position.set(0, 0, 0);
 scene.add(originDot);
+originDot.layers.set(NO_BLOOM_LAYER);
 
 // ── Corner orientation gizmo ──────────────────────────────
 const gizmoScene = new THREE.Scene();

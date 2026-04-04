@@ -218,12 +218,23 @@
     <label>Render Quality: <span id="sd-val">2.24</span></label>
     <input type="range" id="slider-sd" min="1.5" max="2.83" step="0.05" value="2.24">
     <h3 style="margin-top:16px">Bloom</h3>
-    <label>Strength: <span id="bloom-str-val">0.4</span></label>
-    <input type="range" id="slider-bloom-str" min="0" max="3" step="0.05" value="0.4">
-    <label>Radius: <span id="bloom-rad-val">0.5</span></label>
-    <input type="range" id="slider-bloom-rad" min="0" max="1" step="0.05" value="0.5">
-    <label>Threshold: <span id="bloom-thr-val">0.85</span></label>
-    <input type="range" id="slider-bloom-thr" min="0" max="1" step="0.05" value="0.85">
+    <label><input type="checkbox" id="chk-bloom"> Enable</label>
+    <label>Strength: <span id="bloom-str-val">0.80</span></label>
+    <input type="range" id="slider-bloom-str" min="0" max="3" step="0.05" value="0.80">
+    <label>Radius: <span id="bloom-rad-val">0.50</span></label>
+    <input type="range" id="slider-bloom-rad" min="0" max="1" step="0.01" value="0.50">
+    <label>Threshold: <span id="bloom-thr-val">0.20</span></label>
+    <input type="range" id="slider-bloom-thr" min="0" max="1" step="0.01" value="0.20">
+    <h3 style="margin-top:16px">Lens Flare</h3>
+    <label><input type="checkbox" id="chk-lensflare"> Enable</label>
+    <label>Intensity: <span id="lf-intensity-val">1.00</span></label>
+    <input type="range" id="slider-lf-intensity" min="0" max="3" step="0.05" value="1.00">
+    <label>Streak Length: <span id="lf-streak-val">0.15</span></label>
+    <input type="range" id="slider-lf-streak" min="0.01" max="0.5" step="0.01" value="0.15">
+    <label>Ghosts: <span id="lf-ghost-val">0.00</span></label>
+    <input type="range" id="slider-lf-ghost" min="0" max="1" step="0.01" value="0">
+    <label>Halo: <span id="lf-halo-val">0.00</span></label>
+    <input type="range" id="slider-lf-halo" min="0" max="1" step="0.01" value="0">
   </div>
   <div id="help-panel">
     <div id="help-close">&times;</div>

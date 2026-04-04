@@ -1,6 +1,7 @@
 import { LiteGraph } from 'litegraph.js';
 import * as THREE from 'three';
 import { scene } from '../scene.js';
+import { NO_BLOOM_LAYER } from '../layers.js';
 
 export function registerTransformNode() {
   function TransformNode() {
@@ -20,6 +21,7 @@ export function registerTransformNode() {
     this._helper.userData.transformNode = this;
     this._selected = false;
     scene.add(this._helper);
+    this._helper.layers.set(NO_BLOOM_LAYER);
 
     // Local transform state
     this._position   = new THREE.Vector3();

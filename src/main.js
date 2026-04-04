@@ -1,21 +1,21 @@
 import { scene } from './scene.js';
 import { renderCornerGizmo } from './gizmos.js';
-import { renderer, camera, composer, bloomPass, spark, keys, applyKeyboardMovement, getRenderScale, setRenderScale, getMouseOver3D, setGizmoDragging } from './viewport.js';
+import { renderer, camera, spark, keys, applyKeyboardMovement, getRenderScale, setRenderScale, getMouseOver3D, setGizmoDragging } from './viewport.js';
 import { initGizmo, attachGizmo, detachGizmo, getActiveTransformNode } from './gizmo-manager.js';
 import { graph, lgCanvas, pushUndo, resizeLG, initGraphManager, startGraph, repairSubgraphLinks } from './graph-manager.js';
 import { initProjectIO } from './project-io.js';
 import { initUI } from './ui.js';
+import { initBloom, renderWithBloom, resizeBloom,
+         setBloomStrength, setBloomRadius, setBloomThreshold, setBloomEnabled,
+         setLensflareEnabled, setLensflareIntensity, setLensflareStreakLength,
+         setLensflareGhostStrength, setLensflareHaloStrength } from './bloom.js';
 
-// ── Wire modules together ────────────────────────────────
-
-// 1. Gizmo needs: camera, domElement, scene, pushUndo, mouseOver3D, viewport dragging sync
 initGizmo(camera, renderer.domElement, scene, {
   pushUndo,
   getMouseOver3D,
   setGizmoDragging,
 });
 
-// 2. Graph manager needs: gizmo attach/detach, keys for hotkey creation
 initGraphManager({
   attachGizmo,
   detachGizmo,
@@ -23,20 +23,23 @@ initGraphManager({
   keys,
 });
 
-// 3. Start graph + resize listeners
 startGraph();
-
-// 4. Project IO needs: graph, lgCanvas, repairSubgraphLinks
 initProjectIO(graph, lgCanvas, { repairSubgraphLinks });
 
-// 5. UI needs: renderer, camera, renderScale accessors, spark, resizeLG
+// ── Bloom / Lensflare init ──────────────────────────────────
+const initScale = getRenderScale();
+initBloom(renderer, scene, camera,
+  Math.round(window.innerWidth * initScale),
+  Math.round(window.innerHeight * initScale));
+
 initUI(renderer, camera, {
   getRenderScale,
   setRenderScale,
   spark,
-  composer,
-  bloomPass,
   resizeLG,
+  setBloomStrength, setBloomRadius, setBloomThreshold, setBloomEnabled,
+  setLensflareEnabled, setLensflareIntensity, setLensflareStreakLength,
+  setLensflareGhostStrength, setLensflareHaloStrength, resizeBloom,
 });
 
 // ── Stats HUD ────────────────────────────────────────────
@@ -72,7 +75,7 @@ function updateStats(now) {
 renderer.setAnimationLoop((time) => {
   graph.runStep(1);
   applyKeyboardMovement();
-  composer.render();
+  renderWithBloom();
   renderCornerGizmo(renderer, camera, getRenderScale());
   updateStats(time);
 });

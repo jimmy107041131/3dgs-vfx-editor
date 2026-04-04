@@ -1,14 +1,12 @@
 import { toggleGrid, toggleAxes, toggleCorner } from './gizmos.js';
 
-// Dependencies injected via init
 let _renderer = null;
 let _camera = null;
 let _getRenderScale = null;
 let _setRenderScale = null;
 let _spark = null;
-let _composer = null;
-let _bloomPass = null;
 let _resizeLG = null;
+let _resizeBloom = null;
 
 // ── Panel layout ───────────────────────────────────────────
 const HEADER_H = 24;
@@ -33,19 +31,19 @@ function applyLayout() {
   graphEl.style.height   = gh + 'px';
 
   const renderScale = _getRenderScale();
-  _renderer.setSize(window.innerWidth * renderScale, viewH * renderScale, false);
+  const bufW = Math.round(window.innerWidth * renderScale);
+  const bufH = Math.round(viewH * renderScale);
+  _renderer.setSize(bufW, bufH, false);
   _renderer.domElement.style.width  = window.innerWidth + 'px';
   _renderer.domElement.style.height = viewH + 'px';
   _camera.aspect = window.innerWidth / viewH;
   _camera.updateProjectionMatrix();
+  // Bloom composers: pass buffer dimensions directly, bypass pixelRatio
+  if (_resizeBloom) _resizeBloom(bufW, bufH);
 
-  if (_composer) _composer.setSize(window.innerWidth * renderScale, viewH * renderScale);
-
-  // Stats HUD: just below corner gizmo
   const statsEl = document.getElementById('stats-hud');
   if (statsEl) statsEl.style.bottom = (gh + divH + 4) + 'px';
 
-  // Reset camera button: 3D viewport bottom-right
   const resetBtn = document.getElementById('btn-reset-cam');
   if (resetBtn) resetBtn.style.bottom = (gh + divH + 12) + 'px';
 }
@@ -81,15 +79,17 @@ document.getElementById('btn-collapse').addEventListener('click', () => {
 const settingsPanel = document.getElementById('settings-panel');
 const helpPanel = document.getElementById('help-panel');
 
-export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark, composer, bloomPass, resizeLG }) {
+export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark, resizeLG,
+  setBloomStrength, setBloomRadius, setBloomThreshold, setBloomEnabled,
+  setLensflareEnabled, setLensflareIntensity, setLensflareStreakLength,
+  setLensflareGhostStrength, setLensflareHaloStrength, resizeBloom }) {
   _renderer = renderer;
   _camera = camera;
   _getRenderScale = getRenderScale;
   _setRenderScale = setRenderScale;
   _spark = spark;
-  _composer = composer;
-  _bloomPass = bloomPass;
   _resizeLG = resizeLG;
+  _resizeBloom = resizeBloom;
 
   const sliderPR = document.getElementById('slider-pr');
   const sliderSD = document.getElementById('slider-sd');
@@ -110,28 +110,68 @@ export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark
     _spark.maxStdDev = v;
   });
 
-  // Bloom sliders
-  const sliderBStr = document.getElementById('slider-bloom-str');
-  const sliderBRad = document.getElementById('slider-bloom-rad');
-  const sliderBThr = document.getElementById('slider-bloom-thr');
-  const bStrVal = document.getElementById('bloom-str-val');
-  const bRadVal = document.getElementById('bloom-rad-val');
-  const bThrVal = document.getElementById('bloom-thr-val');
+  // ── Bloom sliders ──────────────────────────────────────────
+  const bloomStrSlider = document.getElementById('slider-bloom-str');
+  const bloomRadSlider = document.getElementById('slider-bloom-rad');
+  const bloomThrSlider = document.getElementById('slider-bloom-thr');
+  const bloomStrVal = document.getElementById('bloom-str-val');
+  const bloomRadVal = document.getElementById('bloom-rad-val');
+  const bloomThrVal = document.getElementById('bloom-thr-val');
 
-  sliderBStr.addEventListener('input', () => {
-    const v = parseFloat(sliderBStr.value);
-    bStrVal.textContent = v.toFixed(2);
-    if (_bloomPass) _bloomPass.strength = v;
+  bloomStrSlider.addEventListener('input', () => {
+    const v = parseFloat(bloomStrSlider.value);
+    bloomStrVal.textContent = v.toFixed(2);
+    setBloomStrength(v);
   });
-  sliderBRad.addEventListener('input', () => {
-    const v = parseFloat(sliderBRad.value);
-    bRadVal.textContent = v.toFixed(2);
-    if (_bloomPass) _bloomPass.radius = v;
+  bloomRadSlider.addEventListener('input', () => {
+    const v = parseFloat(bloomRadSlider.value);
+    bloomRadVal.textContent = v.toFixed(2);
+    setBloomRadius(v);
   });
-  sliderBThr.addEventListener('input', () => {
-    const v = parseFloat(sliderBThr.value);
-    bThrVal.textContent = v.toFixed(2);
-    if (_bloomPass) _bloomPass.threshold = v;
+  bloomThrSlider.addEventListener('input', () => {
+    const v = parseFloat(bloomThrSlider.value);
+    bloomThrVal.textContent = v.toFixed(2);
+    setBloomThreshold(v);
+  });
+  document.getElementById('chk-bloom').addEventListener('change', (e) => {
+    setBloomEnabled(e.target.checked);
+  });
+
+  // ── Lens Flare controls ─────────────────────────────────────
+  document.getElementById('chk-lensflare').addEventListener('change', (e) => {
+    setLensflareEnabled(e.target.checked);
+  });
+
+  const lfIntSlider = document.getElementById('slider-lf-intensity');
+  const lfIntVal = document.getElementById('lf-intensity-val');
+  lfIntSlider.addEventListener('input', () => {
+    const v = parseFloat(lfIntSlider.value);
+    lfIntVal.textContent = v.toFixed(2);
+    setLensflareIntensity(v);
+  });
+
+  const lfStreakSlider = document.getElementById('slider-lf-streak');
+  const lfStreakVal = document.getElementById('lf-streak-val');
+  lfStreakSlider.addEventListener('input', () => {
+    const v = parseFloat(lfStreakSlider.value);
+    lfStreakVal.textContent = v.toFixed(2);
+    setLensflareStreakLength(v);
+  });
+
+  const lfGhostSlider = document.getElementById('slider-lf-ghost');
+  const lfGhostVal = document.getElementById('lf-ghost-val');
+  lfGhostSlider.addEventListener('input', () => {
+    const v = parseFloat(lfGhostSlider.value);
+    lfGhostVal.textContent = v.toFixed(2);
+    setLensflareGhostStrength(v);
+  });
+
+  const lfHaloSlider = document.getElementById('slider-lf-halo');
+  const lfHaloVal = document.getElementById('lf-halo-val');
+  lfHaloSlider.addEventListener('input', () => {
+    const v = parseFloat(lfHaloSlider.value);
+    lfHaloVal.textContent = v.toFixed(2);
+    setLensflareHaloStrength(v);
   });
 
   document.getElementById('btn-settings').addEventListener('click', () => {
@@ -142,7 +182,6 @@ export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark
     settingsPanel.classList.remove('open');
   });
 
-  // ── Help panel toggle ────────────────────────────────────
   document.getElementById('btn-help').addEventListener('click', () => {
     helpPanel.classList.toggle('open');
     settingsPanel.classList.remove('open');
@@ -151,13 +190,11 @@ export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark
     helpPanel.classList.remove('open');
   });
 
-  // ── Gizmo toggles ──────────────────────────────────────────
   document.getElementById('btn-gizmos').addEventListener('click', (e) => {
     toggleGrid(); toggleAxes(); toggleCorner();
     e.currentTarget.classList.toggle('active');
   });
 
-  // Apply initial layout + resize handler
   window.addEventListener('resize', () => {
     applyLayout();
     if (_resizeLG) _resizeLG();

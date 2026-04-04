@@ -1,14 +1,11 @@
 import * as THREE from 'three';
 import { SparkRenderer } from '@sparkjsdev/spark';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { scene } from './scene.js';
 
 // ── Renderer ──────────────────────────────────────────────
 const container = document.getElementById('canvas-container');
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.toneMapping = THREE.NeutralToneMapping;
 let renderScale = 1.0;
 container.appendChild(renderer.domElement);
 
@@ -19,24 +16,9 @@ scene.add(spark);
 const camera = new THREE.PerspectiveCamera(60, 1, 0.01, 1000);
 camera.position.set(0, 3, 5);
 
-// ── Post-processing ──────────────────────────────────────
-const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
-
-const bloomPass = new UnrealBloomPass(
-  new THREE.Vector2(window.innerWidth, window.innerHeight),
-  0.4,   // strength
-  0.5,   // radius
-  0.85   // threshold
-);
-composer.addPass(bloomPass);
-composer.addPass(new OutputPass());
-
 // ── FPS Camera Controls ──────────────────────────────────
 const keys = {};
 let _mouseOver3D = false;
-
-// Shared gizmo-dragging state — set by gizmo-manager via setter
 let _gizmoDragging = false;
 
 window.addEventListener('keydown', (e) => { keys[e.code] = true; });
@@ -50,7 +32,6 @@ const _forward = new THREE.Vector3();
 const _right   = new THREE.Vector3();
 const _up      = new THREE.Vector3(0, 1, 0);
 
-// Init euler from camera
 _euler.setFromQuaternion(camera.quaternion, 'YXZ');
 
 let isDragLook = false;
@@ -61,7 +42,7 @@ const PAN_SPEED  = 0.005;
 const SCROLL_SPEED = 0.5;
 
 renderer.domElement.addEventListener('mousedown', (e) => {
-  if (_gizmoDragging) return; // don't start camera drag while gizmo is active
+  if (_gizmoDragging) return;
   if (e.button === 0) { isDragLook = true; prevX = e.clientX; prevY = e.clientY; }
   if (e.button === 2) { isDragPan  = true; prevX = e.clientX; prevY = e.clientY; }
 });
@@ -126,12 +107,11 @@ function applyKeyboardMovement() {
   }
 }
 
-// ── Reset camera ────────────────────────────────────────────
 function resetCamera() {
   camera.position.set(2, 0.5, 2);
   camera.lookAt(0, 0, 0);
   _euler.setFromQuaternion(camera.quaternion, 'YXZ');
-  _euler.x = 0; // remove pitch
+  _euler.x = 0;
   camera.quaternion.setFromEuler(_euler);
 }
 
@@ -140,8 +120,6 @@ document.getElementById('btn-reset-cam').addEventListener('click', resetCamera);
 export {
   renderer,
   camera,
-  composer,
-  bloomPass,
   spark,
   keys,
   applyKeyboardMovement,

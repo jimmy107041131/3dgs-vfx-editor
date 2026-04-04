@@ -1,4 +1,5 @@
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
+import { NO_BLOOM_LAYER } from './layers.js';
 
 let tControls;
 let _activeTransformNode = null;
@@ -18,6 +19,7 @@ export function initGizmo(camera, domElement, scene, { pushUndo, getMouseOver3D,
   tControls.visible = false;
   tControls.enabled = false;
   scene.add(tControls.getHelper());
+  tControls.getHelper().traverse(c => c.layers.set(NO_BLOOM_LAYER));
 
   tControls.addEventListener('dragging-changed', (e) => {
     if (e.value && !_gizmoDragging) _pushUndo(); // snapshot before gizmo drag starts
@@ -47,6 +49,7 @@ export function attachGizmo(transformNode) {
   if (!transformNode?._helper) return;
   _activeTransformNode = transformNode;
   tControls.attach(transformNode._helper);
+  tControls.getHelper().traverse(c => c.layers.set(NO_BLOOM_LAYER));
   tControls.visible = true;
   tControls.enabled = true;
 }

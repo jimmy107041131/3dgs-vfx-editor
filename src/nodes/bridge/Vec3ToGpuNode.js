@@ -17,6 +17,7 @@ export function registerVec3ToGpuNode() {
   Vec3ToGpuNode.prototype.color = '#2a3a2a';
   Vec3ToGpuNode.prototype.bgcolor = '#2e3e2e';
   Vec3ToGpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const v = this.getInputData(0);
     if (v) {
       this._uniform.value.copy(v);

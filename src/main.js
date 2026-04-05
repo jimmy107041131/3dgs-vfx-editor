@@ -3,7 +3,8 @@ import { renderCornerGizmo } from './gizmos.js';
 import { renderer, camera, spark, keys, applyKeyboardMovement, getRenderScale, setRenderScale, getMouseOver3D, setGizmoDragging } from './viewport.js';
 import { initGizmo, attachGizmo, detachGizmo, getActiveTransformNode } from './gizmo-manager.js';
 import { graph, lgCanvas, pushUndo, resizeLG, initGraphManager, startGraph, repairSubgraphLinks } from './graph-manager.js';
-import { initProjectIO } from './project-io.js';
+import { initProjectIO, exportSubgraph } from './project-io.js';
+import { setExportFn } from './nodes/SubgraphNode.js';
 import { initUI } from './ui.js';
 import { initBloom, renderWithBloom, resizeBloom,
          setBloomStrength, setBloomRadius, setBloomThreshold, setBloomEnabled,
@@ -25,6 +26,7 @@ initGraphManager({
 
 startGraph();
 initProjectIO(graph, lgCanvas, { repairSubgraphLinks });
+setExportFn(exportSubgraph);
 
 // ── Bloom / Lensflare init ──────────────────────────────────
 const initScale = getRenderScale();

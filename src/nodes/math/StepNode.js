@@ -19,6 +19,7 @@ export function registerStepNode() {
   StepNode.title = 'Step (GPU)';
 
   StepNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const edgeB = this.getInputData(0);
     const xB    = this.getInputData(1);
     if (edgeB !== this._lastEdge || xB !== this._lastX) {

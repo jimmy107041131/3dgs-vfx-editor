@@ -19,6 +19,7 @@ export function registerMathCpuNode() {
     if (this.widgets?.[0]) this.widgets[0].value = this.properties.op ?? '+';
   };
   MathCpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const a = this.getInputData(0) ?? 0;
     const b = this.getInputData(1) ?? 0;
     const fn = OPS[this.properties.op] || OPS['+'];

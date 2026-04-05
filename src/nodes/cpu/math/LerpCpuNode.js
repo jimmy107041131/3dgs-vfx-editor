@@ -13,6 +13,7 @@ export function registerLerpCpuNode() {
   LerpCpuNode.prototype.color = '#1a3a3a';
   LerpCpuNode.prototype.bgcolor = '#1e3e3e';
   LerpCpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const a = this.getInputData(0) ?? 0;
     const b = this.getInputData(1) ?? 1;
     const t = this.getInputData(2) ?? 0.5;

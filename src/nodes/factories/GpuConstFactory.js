@@ -8,6 +8,7 @@ const { DynoFloat, DynoVec2, DynoVec3, DynoVec4 } = dyno;
  * Factory for GPU constant nodes (Float, Vec2, Vec3, Vec4).
  * Handles: uniform creation, widget sync, onConfigure, onExecute, toGLSL stub.
  */
+
 function createGpuConstNode({ name, wireType, fields, DynoClass, ThreeClass, nodeVersion = 1 }) {
   const outputName = wireType.replace('dyno_', '');
   const title = `${name} (GPU)`;
@@ -64,6 +65,7 @@ function createGpuConstNode({ name, wireType, fields, DynoClass, ThreeClass, nod
   };
 
   NodeCtor.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     this.setOutputData(0, this._builder);
   };
 

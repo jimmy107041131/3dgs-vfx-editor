@@ -23,6 +23,7 @@ export function registerMapSetNode() {
   MapSetNode.prototype.bgcolor = '#3e1e2e';
 
   MapSetNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const centerB     = this.getInputData(0);
     const scalesB     = this.getInputData(1);
     const quaternionB = this.getInputData(2);

@@ -16,6 +16,7 @@ export function registerHashFloatNode() {
   HashFloatNode.title = 'HashFloat (GPU)';
 
   HashFloatNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const vB = this.getInputData(0);
     if (vB !== this._lastInput) {
       this._lastInput = vB;

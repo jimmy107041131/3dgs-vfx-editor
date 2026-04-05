@@ -17,6 +17,7 @@ export function registerBreakVec2Node() {
   SplitVec2Node.title = 'BreakVec2 (GPU)';
 
   SplitVec2Node.prototype.onExecute = function () {
+    if (!this.outputs.some((_, i) => this.isOutputConnected(i))) return;
     const inputB = this.getInputData(0);
     if (inputB !== this._lastInput) {
       this._lastInput = inputB;

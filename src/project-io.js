@@ -1,6 +1,7 @@
 import { LiteGraph } from 'litegraph.js';
 import { scene } from './scene.js';
 import { cacheSplatFile } from './graph-manager.js';
+import { resolveUUIDs, injectUUIDs, getUUID } from './node-uuid.js';
 
 // Dependencies injected via init
 let _graph = null;
@@ -233,6 +234,7 @@ export function initProjectIO(graph, lgCanvas, { repairSubgraphLinks }) {
 
       const save     = await jsonRes.json();
       const graphData = migrateGraph(save);
+      resolveUUIDs(graphData);
 
       _graph._nodes.forEach(n => {
         if (n._splatMesh) { scene.remove(n._splatMesh); n._splatMesh = null; }
@@ -295,7 +297,8 @@ export function initProjectIO(graph, lgCanvas, { repairSubgraphLinks }) {
         n._v = 1;
       }
     }
-    const save = { version: 3, splatFiles, graph: data };
+    injectUUIDs(data);
+    const save = { version: 4, splatFiles, graph: data };
     const blob = new Blob([JSON.stringify(save)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -326,6 +329,7 @@ export function initProjectIO(graph, lgCanvas, { repairSubgraphLinks }) {
         try {
           const save = JSON.parse(reader.result);
           const graphData = migrateGraph(save);
+          resolveUUIDs(graphData);
 
           _graph._nodes.forEach(n => {
             if (n._splatMesh) { scene.remove(n._splatMesh); n._splatMesh = null; }
@@ -358,4 +362,110 @@ export function initProjectIO(graph, lgCanvas, { repairSubgraphLinks }) {
     };
     input.click();
   });
+
+  // ── Import Subgraph ────────────────────────────────────
+  document.getElementById('btn-import-subgraph').addEventListener('click', () => {
+    fileDropdown.classList.remove('open');
+    importSubgraph();
+  });
+}
+
+// ── Export single subgraph node ─────────────────────────
+export function exportSubgraph(node) {
+  const nodeData = node.serialize();
+  delete nodeData.id;
+  nodeData.pos = [0, 0];
+  injectUUIDs({ nodes: [nodeData] });
+  if (nodeData.subgraph) injectUUIDs(nodeData.subgraph);
+  const save = {
+    type: 'dyno-subgraph',
+    version: 1,
+    title: node.title || 'Subgraph',
+    nodeData,
+  };
+  const blob = new Blob([JSON.stringify(save, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (node.title || 'subgraph').replace(/[^a-zA-Z0-9_\-]/g, '_') + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── Import subgraph from .json file ─────────────────────
+function importSubgraph() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const save = JSON.parse(reader.result);
+        if (save.type !== 'dyno-subgraph') {
+          alert('Not a valid subgraph file');
+          return;
+        }
+        const nodeData = save.nodeData;
+
+        // Resolve UUIDs to current paths
+        resolveUUIDs({ nodes: [nodeData] });
+        if (nodeData.subgraph) resolveUUIDs(nodeData.subgraph);
+
+        const node = LiteGraph.createNode('Subgraph/Subgraph');
+        if (!node) { alert('Subgraph node type not registered'); return; }
+
+        // Position at center of visible canvas area
+        const area = _lgCanvas.visible_area;
+        node.pos = [
+          area[0] + area[2] / 2 - (nodeData.size?.[0] ?? 200) / 2,
+          area[1] + area[3] / 2 - (nodeData.size?.[1] ?? 100) / 2,
+        ];
+
+        _graph.add(node);
+        node.configure(nodeData);
+        node.title = save.title || nodeData.title || 'Imported';
+
+        // Repair inner subgraph links
+        if (nodeData.subgraph) {
+          repairInnerSubgraph(node, nodeData.subgraph);
+        }
+
+        _lgCanvas.setDirty(true, true);
+      } catch (err) {
+        alert('Failed to import subgraph: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function repairInnerSubgraph(subgraphNode, sgData) {
+  const sg = subgraphNode.subgraph;
+  if (!sg || !sgData.links || !sgData.nodes) return;
+
+  const usedLinks = new Set();
+  for (const n of sgData.nodes) {
+    if (n.inputs) n.inputs.forEach(inp => { if (inp.link != null) usedLinks.add(inp.link); });
+    if (n.outputs) n.outputs.forEach(out => { if (out.links) out.links.forEach(l => usedLinks.add(l)); });
+  }
+
+  for (const link of sgData.links) {
+    if (!link) continue;
+    const [linkId, originId, originSlot, targetId, targetSlot] =
+      Array.isArray(link) ? link : [link.id, link.origin_id, link.origin_slot, link.target_id, link.target_slot];
+    if (!usedLinks.has(linkId)) continue;
+
+    const originNode = sg.getNodeById(originId);
+    const targetNode = sg.getNodeById(targetId);
+    if (!originNode || !targetNode) continue;
+
+    const inputOk  = targetNode.inputs?.[targetSlot]?.link === linkId;
+    const outputOk = originNode.outputs?.[originSlot]?.links?.includes(linkId);
+    if (inputOk && outputOk && sg.links[linkId]) continue;
+
+    originNode.connect(originSlot, targetNode, targetSlot);
+  }
 }

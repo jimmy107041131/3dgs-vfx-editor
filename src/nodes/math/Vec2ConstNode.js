@@ -32,6 +32,7 @@ export function registerVec2ConstNode() {
   };
 
   Vec2ConstNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     this.setOutputData(0, this._builder);
   };
 

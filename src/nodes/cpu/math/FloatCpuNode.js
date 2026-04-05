@@ -16,6 +16,7 @@ export function registerFloatCpuNode() {
     if (this.widgets?.[0]) this.widgets[0].value = v;
   };
   FloatCpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     this.setOutputData(0, this.properties.value);
   };
   LiteGraph.registerNodeType('CPU/math/Float (CPU)', FloatCpuNode);

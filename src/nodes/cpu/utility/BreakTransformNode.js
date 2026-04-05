@@ -16,6 +16,7 @@ export function registerBreakTransformNode() {
   BreakTransformNode.prototype.bgcolor = '#3e2e1e';
 
   BreakTransformNode.prototype.onExecute = function () {
+    if (!this.outputs.some((_, i) => this.isOutputConnected(i))) return;
     const tf = this.getInputData(0);
     if (!tf) return;
 

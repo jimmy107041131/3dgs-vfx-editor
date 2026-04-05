@@ -22,6 +22,7 @@ export function registerClampNode() {
   }
   ClampNode.title = 'Clamp (GPU)';
   ClampNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const xB = this.getInputData(0);
     const mnB = this.getInputData(1);
     const mxB = this.getInputData(2);
@@ -53,6 +54,7 @@ export function registerLerpNode() {
   }
   LerpNode.title = 'Lerp (GPU)';
   LerpNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const aB = this.getInputData(0);
     const bB = this.getInputData(1);
     const tB = this.getInputData(2);
@@ -84,6 +86,7 @@ export function registerDistanceNode() {
   DistanceNode.title = 'Distance (GPU)';
   const _zeroV = new DynoVec3({ value: new THREE.Vector3(0, 0, 0) });
   DistanceNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const aB = this.getInputData(0);
     const bB = this.getInputData(1);
     if (aB !== this._lastA || bB !== this._lastB) {
@@ -113,6 +116,7 @@ export function registerDotNode() {
   DotNode.title = 'Dot (GPU)';
   const _zeroV2 = new DynoVec3({ value: new THREE.Vector3(0, 0, 0) });
   DotNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const aB = this.getInputData(0);
     const bB = this.getInputData(1);
     if (aB !== this._lastA || bB !== this._lastB) {
@@ -140,6 +144,7 @@ export function registerNormalizeNode() {
   }
   NormalizeNode.title = 'Normalize (GPU)';
   NormalizeNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const inputB = this.getInputData(0);
     if (inputB !== this._lastInput) {
       this._lastInput = inputB;
@@ -164,6 +169,7 @@ export function registerSmoothstepNode() {
   }
   SmoothstepNode.title = 'Smoothstep (GPU)';
   SmoothstepNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const e0B = this.getInputData(0);
     const e1B = this.getInputData(1);
     const xB  = this.getInputData(2);

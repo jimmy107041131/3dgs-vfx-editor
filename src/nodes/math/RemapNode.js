@@ -43,6 +43,7 @@ export function registerRemapNode() {
   };
 
   RemapNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const xB = this.getInputData(0);
     if (xB !== this._lastInput) {
       this._lastInput = xB;

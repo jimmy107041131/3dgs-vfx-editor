@@ -2,6 +2,7 @@ import { LGraph, LGraphCanvas, LiteGraph } from 'litegraph.js';
 import 'litegraph.js/css/litegraph.css';
 import { scene } from './scene.js';
 import { registerNodes } from './nodes/index.js';
+import { resolveUUIDs, injectUUIDs } from './node-uuid.js';
 
 // Dependencies injected via init
 let _attachGizmo = null;
@@ -210,7 +211,9 @@ function pushUndo() {
   const now = performance.now();
   if (now - _lastSnapshotTime < 300) return; // debounce rapid changes
   _lastSnapshotTime = now;
-  const snapshot = JSON.stringify(graph.serialize());
+  const data = graph.serialize();
+  injectUUIDs(data);
+  const snapshot = JSON.stringify(data);
   undoStack.push(snapshot);
   if (undoStack.length > MAX_UNDO) undoStack.shift();
   redoStack.length = 0; // new action clears redo
@@ -232,6 +235,7 @@ function restoreSnapshot(snapshot) {
   _detachGizmo();
   graph.stop();
   const parsed = JSON.parse(snapshot);
+  resolveUUIDs(parsed);
   graph.configure(parsed);
   repairSubgraphLinks(parsed);
   graph.start(1e8);

@@ -98,7 +98,6 @@ export function registerSplatSourceNode() {
     });
   };
 
-
   SplatSourceNode.prototype.onConfigure = function () {
     if (this.properties.fileName) {
       this._fileName = this.properties.fileName;
@@ -116,8 +115,6 @@ export function registerSplatSourceNode() {
       fileName: this._fileName,
     });
   };
-
-
 
   SplatSourceNode.prototype.onRemoved = function () {
     if (this._splatMesh?.dispose) this._splatMesh.dispose();

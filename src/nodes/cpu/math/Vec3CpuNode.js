@@ -22,6 +22,7 @@ export function registerVec3CpuNode() {
     if (this.widgets?.[2]) this.widgets[2].value = z;
   };
   Vec3CpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     this.setOutputData(0, new THREE.Vector3(this.properties.x, this.properties.y, this.properties.z));
   };
   LiteGraph.registerNodeType('CPU/math/Vec3 (CPU)', Vec3CpuNode);

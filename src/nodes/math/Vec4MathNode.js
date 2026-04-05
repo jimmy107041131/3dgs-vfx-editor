@@ -43,6 +43,7 @@ export function registerVec4MathNode() {
   Vec4MathNode.title = 'Vec4Math (GPU)';
 
   Vec4MathNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const aB = this.getInputData(0);
     const bB = this.getInputData(1);
     const op = this.properties.op;

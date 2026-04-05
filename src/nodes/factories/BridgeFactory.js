@@ -8,6 +8,7 @@ const { DynoFloat, DynoVec2, DynoVec3, DynoVec4 } = dyno;
  * Factory for CPU→GPU bridge nodes.
  * Wraps a JS value into a Dyno uniform each frame.
  */
+
 function createBridgeNode({ name, jsType, dynoType, DynoClass, defaultValue, copyFn }) {
   const title = name;
   const path = `Bridge/${name}`;
@@ -26,6 +27,7 @@ function createBridgeNode({ name, jsType, dynoType, DynoClass, defaultValue, cop
   NodeCtor.prototype.bgcolor = '#2e3e2e';
 
   NodeCtor.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const v = this.getInputData(0);
     copyFn(this._uniform, v);
     this.setOutputData(0, this._builder);

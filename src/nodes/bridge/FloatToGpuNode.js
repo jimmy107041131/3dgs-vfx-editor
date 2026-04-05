@@ -16,6 +16,7 @@ export function registerFloatToGpuNode() {
   FloatToGpuNode.prototype.color = '#2a3a2a';
   FloatToGpuNode.prototype.bgcolor = '#2e3e2e';
   FloatToGpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const v = this.getInputData(0) ?? 0;
     this._uniform.value = v;
     this.setOutputData(0, this._builder);

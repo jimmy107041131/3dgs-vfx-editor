@@ -13,6 +13,7 @@ export function registerBreakVec3CpuNode() {
   BreakVec3CpuNode.prototype.color = '#1a3a3a';
   BreakVec3CpuNode.prototype.bgcolor = '#1e3e3e';
   BreakVec3CpuNode.prototype.onExecute = function () {
+    if (!this.outputs.some((_, i) => this.isOutputConnected(i))) return;
     const v = this.getInputData(0);
     if (!v) return;
     this.setOutputData(0, v.x);

@@ -19,6 +19,7 @@ export function registerBreakVec4Node() {
   SplitVec4Node.title = 'BreakVec4 (GPU)';
 
   SplitVec4Node.prototype.onExecute = function () {
+    if (!this.outputs.some((_, i) => this.isOutputConnected(i))) return;
     const inputB = this.getInputData(0);
     if (inputB !== this._lastInput) {
       this._lastInput = inputB;

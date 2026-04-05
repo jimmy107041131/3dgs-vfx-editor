@@ -36,6 +36,7 @@ export function registerVec4ConstNode() {
   };
 
   Vec4ConstNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     this.setOutputData(0, this._builder);
   };
 

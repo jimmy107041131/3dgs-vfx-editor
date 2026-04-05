@@ -16,9 +16,11 @@ function makeCpuFuncNode({ name, fn }) {
   Node.prototype.color = '#1a3a3a';
   Node.prototype.bgcolor = '#1e3e3e';
   Node.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const x = this.getInputData(0) ?? 0;
     this.setOutputData(0, fn(x));
   };
+
   LiteGraph.registerNodeType('CPU/math/' + name + ' (CPU)', Node);
 }
 

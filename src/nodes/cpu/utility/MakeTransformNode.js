@@ -16,6 +16,7 @@ export function registerMakeTransformNode() {
   MakeTransformNode.prototype.bgcolor = '#3e2e1e';
 
   MakeTransformNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const pos = this.getInputData(0) ?? new THREE.Vector3();
     const rot = this.getInputData(1) ?? new THREE.Vector3();
     const sca = this.getInputData(2) ?? new THREE.Vector3(1, 1, 1);

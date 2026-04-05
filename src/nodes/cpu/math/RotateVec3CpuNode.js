@@ -13,6 +13,7 @@ export function registerRotateVec3CpuNode() {
   RotateVec3CpuNode.prototype.color = '#1a3a3a';
   RotateVec3CpuNode.prototype.bgcolor = '#1e3e3e';
   RotateVec3CpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const pos = this.getInputData(0) ?? new THREE.Vector3();
     const eul = this.getInputData(1) ?? new THREE.Vector3();
     const euler = new THREE.Euler(

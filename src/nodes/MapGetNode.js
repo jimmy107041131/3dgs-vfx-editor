@@ -63,6 +63,7 @@ export function registerMapGetNode() {
   const _indexBuilder  = (o) => o.index;
 
   MapGetNode.prototype.onExecute = function () {
+    if (!this.outputs.some((_, i) => this.isOutputConnected(i))) return;
     const source = this.getInputData(0);
     if (!source) return;
 

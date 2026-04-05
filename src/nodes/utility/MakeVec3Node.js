@@ -19,6 +19,7 @@ export function registerMakeVec3Node() {
   MakeVec3Node.title = 'MakeVec3 (GPU)';
 
   MakeVec3Node.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const xB = this.getInputData(0);
     const yB = this.getInputData(1);
     const zB = this.getInputData(2);

@@ -18,6 +18,7 @@ export function registerMakeVec2Node() {
   MakeVec2Node.title = 'MakeVec2 (GPU)';
 
   MakeVec2Node.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const xB = this.getInputData(0);
     const yB = this.getInputData(1);
     if (xB !== this._lastX || yB !== this._lastY) {

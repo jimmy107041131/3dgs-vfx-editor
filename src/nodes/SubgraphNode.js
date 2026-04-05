@@ -63,7 +63,6 @@ DynoSubInput.prototype.getTitle = function () {
 
 LiteGraph.registerNodeType('Subgraph/Input', DynoSubInput);
 
-
 // ── Subgraph Output ─────────────────────────────────────────────────────────
 // Placed inside a subgraph to expose an external output port.
 // Writes to this.graph.setOutputData so the parent Subgraph.onExecute can read it.
@@ -120,7 +119,6 @@ DynoSubOutput.prototype.getTitle = function () {
 
 LiteGraph.registerNodeType('Subgraph/Output', DynoSubOutput);
 
-
 // ── Dyno Subgraph ───────────────────────────────────────────────────────────
 // Inherits all built-in subgraph behavior (double-click to open, +/- ports,
 // onExecute value threading) and overrides the input/output node types.
@@ -167,6 +165,14 @@ export function registerSubgraphNode() {
     this.subgraph.onOutputAdded   = origAddedOut;
   };
 
+  // Right-click context menu: Export Subgraph
+  DynoSubgraph.prototype.getExtraMenuOptions = function (_canvas, options) {
+    if (_exportSubgraph) {
+      options.push(null); // separator
+      options.push({ content: 'Export Subgraph...', callback: () => _exportSubgraph(this) });
+    }
+  };
+
   DynoSubgraph.title            = 'Subgraph';
   DynoSubgraph.desc             = 'Reusable node group (dyno-aware)';
   DynoSubgraph.title_color      = '#334';
@@ -175,3 +181,7 @@ export function registerSubgraphNode() {
 
   LiteGraph.registerNodeType('Subgraph/Subgraph', DynoSubgraph);
 }
+
+// Injection point — avoids circular dependency with project-io.js
+let _exportSubgraph = null;
+export function setExportFn(fn) { _exportSubgraph = fn; }

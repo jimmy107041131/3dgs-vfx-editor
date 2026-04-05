@@ -19,6 +19,7 @@ export function registerTimeNode() {
   TimeNode.title = 'Time (GPU)';
 
   TimeNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     this._uniform.value = (performance.now() - this._startTime) / 1000;
     this.setOutputData(0, this._builder);
   };

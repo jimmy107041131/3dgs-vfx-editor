@@ -36,6 +36,7 @@ export function registerVec3MathCpuNode() {
     this.inputs[1].name = isScalar ? 'f' : 'b';
   };
   Vec3MathCpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const a = this.getInputData(0) ?? new THREE.Vector3();
     const b = this.getInputData(1);
     const op = this.properties.op;

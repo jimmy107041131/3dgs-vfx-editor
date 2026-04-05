@@ -14,6 +14,7 @@ export function registerMakeVec3CpuNode() {
   MakeVec3CpuNode.prototype.color = '#1a3a3a';
   MakeVec3CpuNode.prototype.bgcolor = '#1e3e3e';
   MakeVec3CpuNode.prototype.onExecute = function () {
+    if (!this.isOutputConnected(0)) return;
     const x = this.getInputData(0) ?? 0;
     const y = this.getInputData(1) ?? 0;
     const z = this.getInputData(2) ?? 0;

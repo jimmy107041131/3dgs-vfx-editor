@@ -20,6 +20,7 @@ export function initGizmo(camera, domElement, scene, { pushUndo, getMouseOver3D,
   tControls.enabled = false;
   scene.add(tControls.getHelper());
   tControls.getHelper().traverse(c => c.layers.set(NO_BLOOM_LAYER));
+  tControls.getRaycaster().layers.enable(NO_BLOOM_LAYER);
 
   tControls.addEventListener('dragging-changed', (e) => {
     if (e.value && !_gizmoDragging) _pushUndo(); // snapshot before gizmo drag starts

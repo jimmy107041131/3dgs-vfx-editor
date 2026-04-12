@@ -1,6 +1,6 @@
 import { LiteGraph } from 'litegraph.js';
 
-const OPS = { '+': (a,b)=>a+b, '-': (a,b)=>a-b, '×': (a,b)=>a*b, '÷': (a,b)=>b!==0?a/b:0 };
+const OPS = { '+': (a,b)=>a+b, '-': (a,b)=>a-b, '×': (a,b)=>a*b, '÷': (a,b)=>b!==0?a/b:0, 'min': Math.min, 'max': Math.max, 'mod': (a,b)=>b!==0?((a%b)+b)%b:0 };
 
 export function registerMathCpuNode() {
   function MathCpuNode() {

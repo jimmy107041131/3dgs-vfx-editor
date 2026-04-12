@@ -64,6 +64,14 @@
       pointer-events: none; line-height: 1.6; white-space: pre;
     }
 
+    /* Version HUD */
+    #version-hud {
+      position: fixed; right: 60px; bottom: 12px;
+      color: rgba(255,255,255,0.3); font-size: 11px;
+      font-family: monospace; z-index: 5;
+      pointer-events: none;
+    }
+
     /* Loading overlay */
     #loading-overlay {
       display: none;
@@ -155,7 +163,8 @@
     #settings-panel {
       display: none;
       position: fixed; top: 52px; right: 12px;
-      width: 260px;
+      width: 260px; max-height: calc(100vh - 70px);
+      overflow-y: auto;
       background: #2a2a2a; border: 1px solid #555; border-radius: 8px;
       padding: 16px 18px; z-index: 20;
       color: #ddd; font-size: 13px; line-height: 1.8;
@@ -184,6 +193,7 @@
 <body>
   <div id="canvas-container"></div>
   <div id="stats-hud"></div>
+  <div id="version-hud">v1.1.0</div>
   <div id="loading-overlay">
     <div id="loading-box">
       <div id="loading-text">Loading demo...</div>
@@ -236,6 +246,14 @@
     <input type="range" id="slider-lf-ghost" min="0" max="1" step="0.01" value="0">
     <label>Halo: <span id="lf-halo-val">0.00</span></label>
     <input type="range" id="slider-lf-halo" min="0" max="1" step="0.01" value="0">
+    <h3 style="margin-top:16px">Sun</h3>
+    <label><input type="checkbox" id="chk-sun" checked> Enable</label>
+    <label>Intensity: <span id="sun-int-val">0.80</span></label>
+    <input type="range" id="slider-sun-int" min="0" max="3" step="0.05" value="0.80">
+    <label>Azimuth: <span id="sun-azi-val">45</span>°</label>
+    <input type="range" id="slider-sun-azi" min="0" max="360" step="1" value="45">
+    <label>Elevation: <span id="sun-elev-val">60</span>°</label>
+    <input type="range" id="slider-sun-elev" min="0" max="90" step="1" value="60">
   </div>
   <div id="help-panel">
     <div id="help-close">&times;</div>
@@ -249,6 +267,7 @@
         <li><b>Move</b> — W A S D (hover viewport)</li>
         <li><b>Up / Down</b> — E / Q</li>
         <li><b>Sprint</b> — Hold Shift</li>
+        <li><b>Gizmo</b> — 1 / 2 / 3 (Translate / Rotate / Scale)</li>
       </ul>
     </section>
     <section>
@@ -258,20 +277,43 @@
         <li><b>Connect</b> — Drag from output → input</li>
         <li><b>Delete</b> — Select node, press Delete</li>
         <li><b>Pan</b> — Left-click drag on background</li>
-        <li><b>1 + click</b> — Quick add Float</li>
-        <li><b>2 + click</b> — Quick add Vec2</li>
-        <li><b>3 + click</b> — Quick add Vec3</li>
-        <li><b>4 + click</b> — Quick add Vec4</li>
+        <li><b>Undo / Redo</b> — Ctrl+Z / Ctrl+Y</li>
+        <li><b>Duplicate</b> — Ctrl+D</li>
+        <li><b>1 + click</b> — Quick add Float (GPU)</li>
+        <li><b>2 + click</b> — Quick add Vec2 (GPU)</li>
+        <li><b>3 + click</b> — Quick add Vec3 (GPU)</li>
+        <li><b>4 + click</b> — Quick add Vec4 (GPU)</li>
       </ul>
     </section>
     <section>
       <h4>Pipeline</h4>
       <p>SplatSource → MapGet → <i>[effects]</i> → MapSet → Transform → Renderer</p>
       <ul>
-        <li><b>MapGet</b> — Extract per-splat properties</li>
+        <li><b>MapGet</b> — Extract per-splat properties (rotation + scale)</li>
         <li><b>MapSet</b> — Combine modified properties</li>
-        <li><b>Transform</b> — Position / Rotation / Scale</li>
+        <li><b>Transform</b> — Position / Rotation / Scale (viewport gizmo)</li>
         <li><b>Presets</b> — Double-click to expand subgraph</li>
+      </ul>
+    </section>
+    <section>
+      <h4>Key Input (CPU)</h4>
+      <ul>
+        <li><b>Key Input</b> — Outputs 0/1 on key press</li>
+      </ul>
+    </section>
+    <section>
+      <h4>Variables (CPU)</h4>
+      <ul>
+        <li><b>Set Float</b> — Write named variable (pass-through)</li>
+        <li><b>Get Float</b> — Read named variable (wireless)</li>
+      </ul>
+    </section>
+    <section>
+      <h4>CPU / GPU Domains</h4>
+      <ul>
+        <li><i>CPU nodes</i> — js_float / js_vec3 (teal wires)</li>
+        <li><i>GPU nodes</i> — per-splat shader ops (default wires)</li>
+        <li><i>Bridge</i> — Auto-inserted when connecting CPU → GPU</li>
       </ul>
     </section>
   </div>

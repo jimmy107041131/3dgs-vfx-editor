@@ -4,6 +4,16 @@ import { scene } from './scene.js';
 import { registerNodes } from './nodes/index.js';
 import { resolveUUIDs, injectUUIDs } from './node-uuid.js';
 
+// ── Unsaved changes tracking ──
+let _graphDirty = false;
+window.addEventListener('beforeunload', (e) => {
+  if (_graphDirty) {
+    e.preventDefault();
+    e.returnValue = 'You have unsaved changes.';
+    return 'You have unsaved changes.';
+  }
+});
+
 // Dependencies injected via init
 let _attachGizmo = null;
 let _detachGizmo = null;
@@ -125,11 +135,29 @@ const JS_TO_DYNO = {
   'js_float:dyno_float': 'Bridge/FloatToGPU',
   'js_vec3:dyno_vec3': 'Bridge/Vec3ToGPU',
 };
+// Allow js→dyno bridgeable pairs to highlight on drag
+// LiteGraph calls isValidConnection with (input, output) or (output, input) depending on context,
+// so check both directions.
+const _origIsValid = LiteGraph.isValidConnection;
+LiteGraph.isValidConnection = function (type_a, type_b) {
+  if (_origIsValid.call(this, type_a, type_b)) return true;
+  return !!JS_TO_DYNO[`${type_a}:${type_b}`] || !!JS_TO_DYNO[`${type_b}:${type_a}`];
+};
+
 const DYNO_TYPES = new Set(['dyno_float', 'dyno_vec2', 'dyno_vec3', 'dyno_vec4', 'dyno_int', 'splat_source', 'splat_emitter']);
 const JS_TYPES = new Set(['js_float', 'js_vec3']);
 
 const _origConnect = LiteGraph.LGraphNode.prototype.connect;
 LiteGraph.LGraphNode.prototype.connect = function (outputSlot, targetNode, targetSlot) {
+  // Resolve slot indices (LiteGraph may pass string names or numbers)
+  if (typeof outputSlot === 'string') {
+    outputSlot = this.findOutputSlot(outputSlot);
+    if (outputSlot === -1) return null;
+  }
+  if (typeof targetSlot === 'string') {
+    targetSlot = targetNode.findInputSlot(targetSlot);
+    if (targetSlot === -1) return null;
+  }
   const output = this.outputs?.[outputSlot];
   const input = targetNode?.inputs?.[targetSlot];
   if (output && input) {
@@ -139,7 +167,6 @@ LiteGraph.LGraphNode.prototype.connect = function (outputSlot, targetNode, targe
       const bridgeType = JS_TO_DYNO[key];
       const bridge = LiteGraph.createNode(bridgeType);
       if (bridge && this.graph) {
-        // Position bridge between source and target
         bridge.pos = [
           (this.pos[0] + targetNode.pos[0]) / 2,
           (this.pos[1] + targetNode.pos[1]) / 2,
@@ -149,6 +176,9 @@ LiteGraph.LGraphNode.prototype.connect = function (outputSlot, targetNode, targe
         _origConnect.call(bridge, 0, targetNode, targetSlot);
         return;
       }
+      // Bridge creation failed — block direct js→dyno connection
+      console.warn(`Auto-bridge failed for ${key}. Bridge type: ${bridgeType}`);
+      return null;
     }
     // Block: dyno → js (no reverse bridge)
     if (DYNO_TYPES.has(output.type) && JS_TYPES.has(input.type)) {
@@ -172,6 +202,71 @@ for (const type in LiteGraph.registered_node_types) {
 
 const graph = new LGraph();
 graph.filter = FILTER;
+
+// ── Bridge deletion guard ──
+// Intercept graph.remove to prevent auto-reconnect from recreating bridges
+const _origGraphRemove = graph.remove;
+graph.remove = function (node) {
+  const isBridge = node?.type?.startsWith('Bridge/');
+  if (isBridge) graph._deletingBridge = true;
+  const result = _origGraphRemove.call(this, node);
+  if (isBridge) {
+    // Clean up auto-reconnected js→dyno direct links
+    for (const n of graph._nodes) {
+      if (!n.outputs) continue;
+      for (let oi = 0; oi < n.outputs.length; oi++) {
+        const output = n.outputs[oi];
+        if (!output.links || !JS_TYPES.has(output.type)) continue;
+        for (const linkId of [...output.links]) {
+          const link = graph.links[linkId];
+          if (!link) continue;
+          const target = graph.getNodeById(link.target_id);
+          if (!target) continue;
+          const input = target.inputs?.[link.target_slot];
+          if (input && JS_TO_DYNO[`${output.type}:${input.type}`]) {
+            n.disconnectOutput(oi, target);
+          }
+        }
+      }
+    }
+    graph._deletingBridge = false;
+  }
+  return result;
+};
+
+// ── Post-hoc auto-bridge: fix js→dyno direct connections ──
+graph._deletingBridge = false;
+graph.onConnectionChange = function (node) {
+  if (graph._deletingBridge) return;
+  if (!node?.outputs) return;
+  for (let oi = 0; oi < node.outputs.length; oi++) {
+    const output = node.outputs[oi];
+    if (!output.links || !JS_TYPES.has(output.type)) continue;
+    for (const linkId of output.links) {
+      const link = graph.links[linkId];
+      if (!link) continue;
+      const targetNode = graph.getNodeById(link.target_id);
+      if (!targetNode) continue;
+      const input = targetNode.inputs?.[link.target_slot];
+      if (!input) continue;
+      const key = `${output.type}:${input.type}`;
+      if (!JS_TO_DYNO[key]) continue;
+      // Found a direct js→dyno connection — insert bridge
+      const bridge = LiteGraph.createNode(JS_TO_DYNO[key]);
+      if (!bridge) continue;
+      bridge.pos = [
+        (node.pos[0] + targetNode.pos[0]) / 2,
+        (node.pos[1] + targetNode.pos[1]) / 2,
+      ];
+      graph.add(bridge);
+      // Disconnect the direct link, reconnect through bridge
+      node.disconnectOutput(oi, targetNode);
+      node.connect(oi, bridge, 0);
+      bridge.connect(0, targetNode, link.target_slot);
+      return; // connectionChange will fire again for the new connections
+    }
+  }
+};
 
 // ── Node error visual feedback ──────────────────────────
 graph.onAfterExecute = function () {
@@ -211,6 +306,7 @@ function pushUndo() {
   const now = performance.now();
   if (now - _lastSnapshotTime < 300) return; // debounce rapid changes
   _lastSnapshotTime = now;
+  _graphDirty = true;
   const data = graph.serialize();
   injectUUIDs(data);
   const snapshot = JSON.stringify(data);
@@ -252,6 +348,13 @@ function restoreSnapshot(snapshot) {
 }
 
 graph.onBeforeChange = () => pushUndo();
+
+// Mark dirty on widget changes (LiteGraph sets node_widget during widget interaction)
+lgCanvas.canvas.addEventListener('pointerup', () => {
+  if (lgCanvas.node_widget) _graphDirty = true;
+});
+// Mark dirty on node moves
+graph.onAfterChange = () => { _graphDirty = true; };
 
 // ── Repair subgraph links after configure ────────────────
 function repairSubgraphLinks(graphData) {
@@ -447,5 +550,7 @@ export function startGraph() {
   graph.start(1e8);
   resizeLG();
 }
+
+export function clearDirty() { _graphDirty = false; }
 
 export { graph, lgCanvas, pushUndo, repairSubgraphLinks };

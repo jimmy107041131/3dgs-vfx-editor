@@ -1,4 +1,5 @@
 import { toggleGrid, toggleAxes, toggleCorner } from './gizmos.js';
+import { directional } from './scene.js';
 
 let _renderer = null;
 let _camera = null;
@@ -188,6 +189,38 @@ export function initUI(renderer, camera, { getRenderScale, setRenderScale, spark
   });
   document.getElementById('help-close').addEventListener('click', () => {
     helpPanel.classList.remove('open');
+  });
+
+  // ── Sun controls ────────────────────────────────────────────
+  function updateSunPosition() {
+    const azi = parseFloat(document.getElementById('slider-sun-azi').value) * Math.PI / 180;
+    const elev = parseFloat(document.getElementById('slider-sun-elev').value) * Math.PI / 180;
+    const r = 10;
+    directional.position.set(
+      r * Math.cos(elev) * Math.sin(azi),
+      r * Math.sin(elev),
+      r * Math.cos(elev) * Math.cos(azi),
+    );
+  }
+
+  document.getElementById('chk-sun').addEventListener('change', (e) => {
+    directional.visible = e.target.checked;
+  });
+
+  document.getElementById('slider-sun-int').addEventListener('input', () => {
+    const v = parseFloat(document.getElementById('slider-sun-int').value);
+    document.getElementById('sun-int-val').textContent = v.toFixed(2);
+    directional.intensity = v;
+  });
+
+  document.getElementById('slider-sun-azi').addEventListener('input', () => {
+    document.getElementById('sun-azi-val').textContent = document.getElementById('slider-sun-azi').value;
+    updateSunPosition();
+  });
+
+  document.getElementById('slider-sun-elev').addEventListener('input', () => {
+    document.getElementById('sun-elev-val').textContent = document.getElementById('slider-sun-elev').value;
+    updateSunPosition();
   });
 
   document.getElementById('btn-gizmos').addEventListener('click', (e) => {

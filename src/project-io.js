@@ -1,6 +1,6 @@
 import { LiteGraph } from 'litegraph.js';
 import { scene } from './scene.js';
-import { cacheSplatFile } from './graph-manager.js';
+import { cacheSplatFile, clearDirty } from './graph-manager.js';
 import { resolveUUIDs, injectUUIDs, getUUID } from './node-uuid.js';
 
 // Dependencies injected via init
@@ -304,6 +304,7 @@ export function initProjectIO(graph, lgCanvas, { repairSubgraphLinks }) {
     a.href = URL.createObjectURL(blob);
     a.download = '3dgs-project.json';
     a.click();
+    clearDirty();
   });
 
   // ── Open project (select folder containing JSON + splat files) ──

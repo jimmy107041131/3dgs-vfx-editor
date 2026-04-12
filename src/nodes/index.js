@@ -43,6 +43,18 @@ import { registerRotateVec3CpuNode } from './cpu/math/RotateVec3CpuNode.js';
 import { registerFloatFuncCpuNode } from './cpu/math/FloatFuncCpuNode.js';
 import { registerTimeCpuNode } from './cpu/math/TimeCpuNode.js';
 import { registerLerpCpuNode } from './cpu/math/LerpCpuNode.js';
+// CPU math (extended)
+import { registerDeltaTimeCpuNode } from './cpu/math/DeltaTimeCpuNode.js';
+import { registerCompareCpuNode } from './cpu/math/CompareCpuNode.js';
+import { registerLogicCpuNode } from './cpu/math/LogicCpuNode.js';
+// CPU variables
+import { registerSetFloatVarNode } from './cpu/variables/SetFloatVarNode.js';
+import { registerGetFloatVarNode } from './cpu/variables/GetFloatVarNode.js';
+// CPU input
+import { registerKeyInputCpuNode } from './cpu/input/KeyInputCpuNode.js';
+// Presets (CPU)
+import { registerAccumulatePreset } from './presets/AccumulatePreset.js';
+import { registerTogglePreset } from './presets/TogglePreset.js';
 
 export function registerNodes() {
   registerModelNode();
@@ -100,6 +112,18 @@ export function registerNodes() {
   registerFloatFuncCpuNode();
   registerTimeCpuNode();
   registerLerpCpuNode();
+  // CPU math (extended)
+  registerDeltaTimeCpuNode();
+  registerCompareCpuNode();
+  registerLogicCpuNode();
+  // CPU variables — must come before presets that use them
+  registerSetFloatVarNode();
+  registerGetFloatVarNode();
+  // CPU input
+  registerKeyInputCpuNode();
+  // presets (CPU) — must come after subgraph + CPU math
+  registerAccumulatePreset();
+  registerTogglePreset();
   // Bridge (factory)
   registerBridgeNodes(); // FloatToGPU, Vec3ToGPU
 }
